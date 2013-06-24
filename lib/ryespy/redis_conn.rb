@@ -26,9 +26,5 @@ module Ryespy
       @redis.quit
     end
     
-    def add
-      @redis.add("")
-    end
-    
   end
 end
