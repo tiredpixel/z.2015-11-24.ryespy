@@ -28,6 +28,7 @@ describe Ryespy::Config do
     before do
       Ryespy.configure do |c|
         c.log_level        = 'ERROR'
+        c.listener         = 'imap'
         c.polling_interval = 13
         c.redis_url        = 'redis://127.0.0.1:6379/1'
         c.redis_ns_ryespy  = 'WithMyLittleEye!'
@@ -38,6 +39,10 @@ describe Ryespy::Config do
     
     it "configures log_level" do
       @config.log_level.must_equal 'ERROR'
+    end
+    
+    it "configures listener" do
+      @config.listener.must_equal 'imap'
     end
     
     it "configures polling_interval" do
@@ -59,7 +64,7 @@ describe Ryespy::Config do
     end
     
     it "stringifies hash of config" do
-      @config.to_s.must_equal '{:log_level=>"INFO", :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy:"}'
+      @config.to_s.must_equal '{:log_level=>"INFO", :listener=>nil, :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy:"}'
     end
   end
   
