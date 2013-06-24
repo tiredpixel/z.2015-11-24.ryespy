@@ -5,6 +5,7 @@ require_relative 'ryespy/config'
 require_relative 'ryespy/redis_conn'
 
 require_relative 'ryespy/listeners/imap'
+require_relative 'ryespy/listeners/ftp'
 
 
 module Ryespy
@@ -64,6 +65,35 @@ module Ryespy
         end
         
         Ryespy.logger.info { "#{mailbox} has #{new_items.count} new emails" }
+      end
+    end
+  end
+  
+  def check_ftp(redis, redis_prefix)
+    redis_prefix += "#{Ryespy.config.ftp_host}:#{Ryespy.config.ftp_username}:"
+    
+    Ryespy::Listener::FTP.new do |listener|
+      Ryespy.config.ftp_dirs.each do |dir|
+        Ryespy.logger.debug { "dir:#{dir}" }
+        
+        redis_key = redis_prefix + "#{dir}"
+        
+        Ryespy.logger.debug { "redis_key:#{redis_key}" }
+        
+        new_items = listener.check({
+          :dir        => dir,
+          :seen_files => redis.hgetall(redis_key),
+        })
+        
+        Ryespy.logger.debug { "new_items:#{new_items}" }
+        
+        new_items.each do |filename, checksum|
+          redis.hset(redis_key, filename, checksum)
+          
+          # TODO: Notify.
+        end
+        
+        Ryespy.logger.info { "#{dir} has #{new_items.count} new files" }
       end
     end
   end

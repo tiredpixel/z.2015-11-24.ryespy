@@ -14,6 +14,12 @@ module Ryespy
     attr_accessor :imap_password
     attr_accessor :imap_mailboxes
     
+    attr_accessor :ftp_host
+    attr_accessor :ftp_passive
+    attr_accessor :ftp_username
+    attr_accessor :ftp_password
+    attr_accessor :ftp_dirs
+    
     def initialize
       @log_level        = 'INFO'
       @polling_interval = 60
@@ -22,6 +28,9 @@ module Ryespy
       @imap_port      = 993
       @imap_ssl       = true
       @imap_mailboxes = ['INBOX']
+      
+      @ftp_passive    = false
+      @ftp_dirs       = ['/']
     end
     
     def to_s
@@ -41,6 +50,13 @@ module Ryespy
           :imap_ssl,
           :imap_username,
           :imap_password,
+        ]
+      when :ftp
+        [
+          :ftp_host,
+          :ftp_passive,
+          :ftp_username,
+          :ftp_dirs,
         ]
       else
         []

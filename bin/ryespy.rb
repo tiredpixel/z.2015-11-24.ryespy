@@ -71,6 +71,29 @@ OptionParser.new do |opts|
   end
   
   opts.separator ""
+  opts.separator "Listener ftp:"
+  
+  opts.on("-h", "--ftp-host HOST", "Connect FTP with HOST") do |o|
+    options[:ftp_host] = o
+  end
+  
+  opts.on("--[no-]ftp-passive", "Connect FTP using PASSIVE mode") do |o|
+    options[:ftp_passive] = o
+  end
+  
+  opts.on("-u", "--ftp-username USERNAME", "Connect FTP with USERNAME") do |o|
+    options[:ftp_username] = o
+  end
+  
+  opts.on("-p", "--ftp-password PASSWORD", "Connect FTP with PASSWORD") do |o|
+    options[:ftp_password] = o
+  end
+  
+  opts.on("--ftp-dirs [dir1,dir2]", Array, "Read FTP DIRS") do |o|
+    options[:ftp_dirs] = o
+  end
+  
+  opts.separator ""
   opts.separator "Other:"
   
   opts.on("-v", "--[no-]verbose", "Be somewhat verbose") do |o|
@@ -119,6 +142,14 @@ Ryespy.configure do |c|
       :imap_username,
       :imap_password,
       :imap_mailboxes,
+    ]
+  when :ftp
+    [
+      :ftp_host,
+      :ftp_passive,
+      :ftp_username,
+      :ftp_password,
+      :ftp_dirs,
     ]
   else
     []
