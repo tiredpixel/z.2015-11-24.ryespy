@@ -33,6 +33,17 @@ OptionParser.new do |opts|
   end
   
   opts.separator ""
+  opts.separator "Redis:"
+  
+  opts.on("--redis-url [URL]", "Connect Redis to URL") do |o|
+    options[:redis_url] = o
+  end
+  
+  opts.on("--redis-ns-ryespy [NS]", "Namespace Redis 'ryespy:' as NS") do |o|
+    options[:redis_ns_ryespy] = o
+  end
+  
+  opts.separator ""
   opts.separator "Other:"
   
   opts.on("-v", "--[no-]verbose", "Be somewhat verbose") do |o|
@@ -56,7 +67,13 @@ end.parse!
 Ryespy.configure do |c|
   c.log_level = 'DEBUG' if options[:verbose]
   
-  c.polling_interval = options[:polling_interval] if options[:polling_interval]
+  params = [
+    :polling_interval,
+    :redis_url,
+    :redis_ns_ryespy,
+  ]
+  
+  params.each { |s| c.send("#{s}=", options[s]) unless options[s].nil? }
 end
 
 @logger = Ryespy.logger
