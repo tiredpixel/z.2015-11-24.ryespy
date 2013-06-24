@@ -18,13 +18,19 @@ describe Ryespy::Config do
     it "sets polling_interval to 60" do
       @config.polling_interval.must_equal 60
     end
+    
+    it "sets redis_ns_ryespy to ryespy:" do
+      @config.redis_ns_ryespy.must_equal 'ryespy:'
+    end
   end
   
   describe "configure block" do
     before do
       Ryespy.configure do |c|
-        c.log_level = 'ERROR'
+        c.log_level        = 'ERROR'
         c.polling_interval = 13
+        c.redis_url        = 'redis://127.0.0.1:6379/1'
+        c.redis_ns_ryespy  = 'WithMyLittleEye!'
       end
       
       @config = Ryespy.config
@@ -37,6 +43,14 @@ describe Ryespy::Config do
     it "configures polling_interval" do
       @config.polling_interval.must_equal 13
     end
+    
+    it "configures redis_url" do
+      @config.redis_url.must_equal 'redis://127.0.0.1:6379/1'
+    end
+    
+    it "configures redis_ns_ryespy" do
+      @config.redis_ns_ryespy.must_equal 'WithMyLittleEye!'
+    end
   end
   
   describe "#to_s" do
@@ -45,7 +59,7 @@ describe Ryespy::Config do
     end
     
     it "stringifies hash of config" do
-      @config.to_s.must_equal '{:log_level=>"INFO", :polling_interval=>60}'
+      @config.to_s.must_equal '{:log_level=>"INFO", :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy:"}'
     end
   end
   
