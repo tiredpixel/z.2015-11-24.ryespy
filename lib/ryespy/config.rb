@@ -6,6 +6,7 @@ module Ryespy
     attr_accessor :polling_interval
     attr_accessor :redis_url
     attr_accessor :redis_ns_ryespy
+    attr_accessor :notifiers
     
     attr_accessor :imap_host
     attr_accessor :imap_port
@@ -24,6 +25,9 @@ module Ryespy
       @log_level        = 'INFO'
       @polling_interval = 60
       @redis_ns_ryespy  = 'ryespy:'
+      @notifiers        = {
+        :sidekiq => [],
+      }
       
       @imap_port      = 993
       @imap_ssl       = true
@@ -40,6 +44,7 @@ module Ryespy
         :polling_interval,
         :redis_url,
         :redis_ns_ryespy,
+        :notifiers,
       ]
       
       params.concat case @listener

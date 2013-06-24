@@ -3,13 +3,18 @@
 $stdout.sync = true
 
 require 'optparse'
+require 'ostruct'
 
 require File.expand_path(File.dirname(__FILE__) + '/../lib/ryespy')
 
 
 # = Parse opts
 
-options = {}
+options = OpenStruct.new
+
+options.notifiers = {
+  :sidekiq => [],
+}
 
 OptionParser.new do |opts|
   opts.banner = "Usage: ryespy [options]"
@@ -94,6 +99,13 @@ OptionParser.new do |opts|
   end
   
   opts.separator ""
+  opts.separator "Notifier sidekiq:"
+  
+  opts.on("--notifier-sidekiq [URL]", "Notify Sidekiq/Resque at Redis URL") do |o|
+    options.notifiers[:sidekiq] << o
+  end
+  
+  opts.separator ""
   opts.separator "Other:"
   
   opts.on("-v", "--[no-]verbose", "Be somewhat verbose") do |o|
@@ -131,6 +143,7 @@ Ryespy.configure do |c|
     :polling_interval,
     :redis_url,
     :redis_ns_ryespy,
+    :notifiers,
   ]
   
   params.concat case c.listener

@@ -4,9 +4,11 @@ require 'redis'
 module Ryespy
   class RedisConn
     
-    def initialize
+    attr_accessor :redis
+    
+    def initialize(url = nil)
       begin
-        @redis = Redis.connect(:url => Ryespy.config.redis_url)
+        @redis = Redis.connect(:url => url)
         
         @redis.ping
       rescue Redis::CannotConnectError => e

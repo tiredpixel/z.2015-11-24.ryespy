@@ -7,6 +7,8 @@ require_relative 'ryespy/redis_conn'
 require_relative 'ryespy/listeners/imap'
 require_relative 'ryespy/listeners/ftp'
 
+require_relative 'ryespy/notifiers/sidekiq'
+
 
 module Ryespy
   
@@ -35,12 +37,22 @@ module Ryespy
   def check_listener
     redis_prefix = "#{Ryespy.config.redis_ns_ryespy}#{Ryespy.config.listener}:"
     
-    Ryespy::RedisConn.new do |redis|
-      Ryespy.send("check_#{Ryespy.config.listener}", redis, redis_prefix)
+    notifiers = []
+    
+    begin
+      Ryespy.config.notifiers[:sidekiq].each do |notifier_instance|
+        notifiers << Ryespy::Notifier::Sidekiq.new(notifier_instance)
+      end
+      
+      Ryespy::RedisConn.new(Ryespy.config.redis_url) do |redis|
+        Ryespy.send("check_#{Ryespy.config.listener}", redis, redis_prefix, notifiers)
+      end
+    ensure
+      notifiers.each { |n| n.close }
     end
   end
   
-  def check_imap(redis, redis_prefix)
+  def check_imap(redis, redis_prefix, notifiers)
     redis_prefix += "#{Ryespy.config.imap_host},#{Ryespy.config.imap_port}:#{Ryespy.config.imap_username}:"
     
     Ryespy::Listener::IMAP.new do |listener|
@@ -61,7 +73,7 @@ module Ryespy
         new_items.each do |uid|
           redis.set(redis_key, uid)
           
-          # TODO: Notify.
+          notifiers.each { |n| n.notify('RyespyIMAPJob', [mailbox, uid]) }
         end
         
         Ryespy.logger.info { "#{mailbox} has #{new_items.count} new emails" }
@@ -69,7 +81,7 @@ module Ryespy
     end
   end
   
-  def check_ftp(redis, redis_prefix)
+  def check_ftp(redis, redis_prefix, notifiers)
     redis_prefix += "#{Ryespy.config.ftp_host}:#{Ryespy.config.ftp_username}:"
     
     Ryespy::Listener::FTP.new do |listener|
@@ -90,7 +102,7 @@ module Ryespy
         new_items.each do |filename, checksum|
           redis.hset(redis_key, filename, checksum)
           
-          # TODO: Notify.
+          notifiers.each { |n| n.notify('RyespyFTPJob', [dir, filename]) }
         end
         
         Ryespy.logger.info { "#{dir} has #{new_items.count} new files" }
