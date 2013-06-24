@@ -64,7 +64,7 @@ describe Ryespy::Config do
     end
     
     it "stringifies hash of config" do
-      @config.to_s.must_equal '{:log_level=>"INFO", :listener=>nil, :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy:"}'
+      @config.to_s.must_equal '{:log_level=>"INFO", :listener=>nil, :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy:", :notifiers=>{:sidekiq=>[]}}'
     end
   end
   

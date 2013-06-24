@@ -8,9 +8,12 @@ Gem::Specification.new do |spec|
   spec.version       = Ryespy::VERSION
   spec.authors       = ["tiredpixel"]
   spec.email         = ["tp@tiredpixel.com"]
-  spec.description   = %q{TODO: Write a gem description}
-  spec.summary       = %q{TODO: Write a gem summary}
-  spec.homepage      = ""
+  spec.description   = %q{Ryespy provides a simple executable for listening to
+    IMAP mailboxes or FTP folders, keeps track of what it's seen using Redis,
+    and notifies Redis in a way in which Resque and Sidekiq can process using
+    workers.}
+  spec.summary       = %q{Ryespy listens to IMAP and FTP and queues in Redis (Sidekiq/Resque).}
+  spec.homepage      = "https://github.com/tiredpixel/ryespy"
   spec.license       = "MIT"
   
   spec.files         = `git ls-files`.split($/)

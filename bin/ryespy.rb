@@ -51,7 +51,7 @@ OptionParser.new do |opts|
   opts.separator ""
   opts.separator "Listener imap:"
   
-  opts.on("-h", "--imap-host HOST", "Connect IMAP with HOST") do |o|
+  opts.on("--imap-host HOST", "Connect IMAP with HOST") do |o|
     options[:imap_host] = o
   end
   
@@ -63,11 +63,11 @@ OptionParser.new do |opts|
     options[:imap_ssl] = o
   end
   
-  opts.on("-u", "--imap-username USERNAME", "Connect IMAP with USERNAME") do |o|
+  opts.on("--imap-username USERNAME", "Connect IMAP with USERNAME") do |o|
     options[:imap_username] = o
   end
   
-  opts.on("-p", "--imap-password PASSWORD", "Connect IMAP with PASSWORD") do |o|
+  opts.on("--imap-password PASSWORD", "Connect IMAP with PASSWORD") do |o|
     options[:imap_password] = o
   end
   
@@ -78,7 +78,7 @@ OptionParser.new do |opts|
   opts.separator ""
   opts.separator "Listener ftp:"
   
-  opts.on("-h", "--ftp-host HOST", "Connect FTP with HOST") do |o|
+  opts.on("--ftp-host HOST", "Connect FTP with HOST") do |o|
     options[:ftp_host] = o
   end
   
@@ -86,11 +86,11 @@ OptionParser.new do |opts|
     options[:ftp_passive] = o
   end
   
-  opts.on("-u", "--ftp-username USERNAME", "Connect FTP with USERNAME") do |o|
+  opts.on("--ftp-username USERNAME", "Connect FTP with USERNAME") do |o|
     options[:ftp_username] = o
   end
   
-  opts.on("-p", "--ftp-password PASSWORD", "Connect FTP with PASSWORD") do |o|
+  opts.on("--ftp-password PASSWORD", "Connect FTP with PASSWORD") do |o|
     options[:ftp_password] = o
   end
   
