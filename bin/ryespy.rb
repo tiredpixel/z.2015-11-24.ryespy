@@ -44,6 +44,33 @@ OptionParser.new do |opts|
   end
   
   opts.separator ""
+  opts.separator "Listener imap:"
+  
+  opts.on("-h", "--imap-host HOST", "Connect IMAP with HOST") do |o|
+    options[:imap_host] = o
+  end
+  
+  opts.on("--imap-port [PORT]", Integer, "Connect IMAP with PORT") do |o|
+    options[:imap_port] = o
+  end
+  
+  opts.on("--[no-]imap-ssl", "Connect IMAP using SSL") do |o|
+    options[:imap_ssl] = o
+  end
+  
+  opts.on("-u", "--imap-username USERNAME", "Connect IMAP with USERNAME") do |o|
+    options[:imap_username] = o
+  end
+  
+  opts.on("-p", "--imap-password PASSWORD", "Connect IMAP with PASSWORD") do |o|
+    options[:imap_password] = o
+  end
+  
+  opts.on("--imap-mailboxes [INBOX,DEV]", Array, "Read IMAP MAILBOXES") do |o|
+    options[:imap_mailboxes] = o
+  end
+  
+  opts.separator ""
   opts.separator "Other:"
   
   opts.on("-v", "--[no-]verbose", "Be somewhat verbose") do |o|
@@ -61,17 +88,41 @@ OptionParser.new do |opts|
   end
 end.parse!
 
+[
+  :listener,
+].each do |o|
+  unless options[o]
+    raise OptionParser::MissingArgument, "--#{o}"
+  end
+end
+
 
 # = Configure
 
 Ryespy.configure do |c|
   c.log_level = 'DEBUG' if options[:verbose]
   
+  c.listener = options[:listener]
+  
   params = [
     :polling_interval,
     :redis_url,
     :redis_ns_ryespy,
   ]
+  
+  params.concat case c.listener
+  when :imap
+    [
+      :imap_host,
+      :imap_port,
+      :imap_ssl,
+      :imap_username,
+      :imap_password,
+      :imap_mailboxes,
+    ]
+  else
+    []
+  end
   
   params.each { |s| c.send("#{s}=", options[s]) unless options[s].nil? }
 end
@@ -82,7 +133,7 @@ end
 # = Main loop
 
 loop do
-  # TODO: Poll listener.
+  Ryespy.check_listener
   
   break unless options[:eternal]
   
