@@ -34,25 +34,31 @@ module Ryespy
     @logger
   end
   
+  def notifiers
+    unless @notifiers
+      @notifiers = []
+      
+      Ryespy.config.notifiers[:sidekiq].each do |notifier_instance|
+        @notifiers << Ryespy::Notifier::Sidekiq.new(notifier_instance)
+      end
+    end
+    
+    @notifiers
+  end
+  
   def check_listener
     redis_prefix = "#{Ryespy.config.redis_ns_ryespy}#{Ryespy.config.listener}:"
     
-    notifiers = []
-    
     begin
-      Ryespy.config.notifiers[:sidekiq].each do |notifier_instance|
-        notifiers << Ryespy::Notifier::Sidekiq.new(notifier_instance)
-      end
-      
       Ryespy::RedisConn.new(Ryespy.config.redis_url) do |redis|
-        Ryespy.send("check_#{Ryespy.config.listener}", redis, redis_prefix, notifiers)
+        Ryespy.send("check_#{Ryespy.config.listener}", redis, redis_prefix)
       end
     ensure
       notifiers.each { |n| n.close }
     end
   end
   
-  def check_imap(redis, redis_prefix, notifiers)
+  def check_imap(redis, redis_prefix)
     redis_prefix += "#{Ryespy.config.imap_host},#{Ryespy.config.imap_port}:#{Ryespy.config.imap_username}:"
     
     Ryespy::Listener::IMAP.new do |listener|
@@ -81,7 +87,7 @@ module Ryespy
     end
   end
   
-  def check_ftp(redis, redis_prefix, notifiers)
+  def check_ftp(redis, redis_prefix)
     redis_prefix += "#{Ryespy.config.ftp_host}:#{Ryespy.config.ftp_username}:"
     
     Ryespy::Listener::FTP.new do |listener|
