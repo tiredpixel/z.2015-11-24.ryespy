@@ -47,8 +47,8 @@ module Ryespy
         :notifiers,
       ]
       
-      params.concat case @listener
-      when :imap
+      params.concat case @listener.to_s
+      when 'imap'
         [
           :imap_host,
           :imap_port,
@@ -56,7 +56,7 @@ module Ryespy
           :imap_username,
           :imap_password,
         ]
-      when :ftp
+      when 'ftp'
         [
           :ftp_host,
           :ftp_passive,

@@ -146,8 +146,8 @@ Ryespy.configure do |c|
     :notifiers,
   ]
   
-  params.concat case c.listener
-  when :imap
+  params.concat case c.listener.to_s
+  when 'imap'
     [
       :imap_host,
       :imap_port,
@@ -156,7 +156,7 @@ Ryespy.configure do |c|
       :imap_password,
       :imap_mailboxes,
     ]
-  when :ftp
+  when 'ftp'
     [
       :ftp_host,
       :ftp_passive,
