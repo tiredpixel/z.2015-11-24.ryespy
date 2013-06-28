@@ -44,6 +44,31 @@ module Ryespy
         end
       end
       
+      def check_all
+        Ryespy.config.imap_mailboxes.each do |mailbox|
+          Ryespy.logger.debug { "mailbox:#{mailbox}" }
+          
+          redis_key = "#{Ryespy.config.redis_prefix_ryespy}#{Ryespy.config.imap_host},#{Ryespy.config.imap_port}:#{Ryespy.config.imap_username}:#{mailbox}"
+          
+          Ryespy.logger.debug { "redis_key:#{redis_key}" }
+          
+          new_items = check({
+            :mailbox       => mailbox,
+            :last_seen_uid => Ryespy.redis.get(redis_key).to_i,
+          })
+          
+          Ryespy.logger.debug { "new_items:#{new_items}" }
+          
+          new_items.each do |uid|
+            Ryespy.redis.set(redis_key, uid)
+            
+            Ryespy.notifiers.each { |n| n.notify('RyespyIMAPJob', [mailbox, uid]) }
+          end
+          
+          Ryespy.logger.info { "#{mailbox} has #{new_items.count} new emails" }
+        end
+      end
+      
     end
   end
 end

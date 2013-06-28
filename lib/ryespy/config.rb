@@ -72,5 +72,9 @@ module Ryespy
       Hash[params].to_s
     end
     
+    def redis_prefix_ryespy
+      "#{Ryespy.config.redis_ns_ryespy}#{Ryespy.config.listener}:"
+    end
+    
   end
 end
