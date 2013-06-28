@@ -57,14 +57,14 @@ doing or planning to do, or if you get stuck on something, then just wave. :)
 Do whatever makes you happy. We'll probably still like you. :)
 
 Tests are written using [minitest](https://github.com/seattlerb/minitest), which
-is included by default in Ruby 1.9 onwards. To run all tests in a pretty way:
+is included by default in Ruby 1.9 onwards. To run all tests:
 
-    ruby -rminitest/pride test/ryespy.rb
+    rake test
 
 Or, if you're of that turn of mind, use [TURN](https://github.com/TwP/turn)
 (`gem install turn`):
 
-    turn test/ryespy.rb
+    turn test/
 
 
 ## Blessing
