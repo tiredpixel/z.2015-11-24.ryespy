@@ -196,4 +196,19 @@ describe Ryespy::Config do
     end
   end
   
+  describe "#redis_prefix_ryespy" do
+    before do
+      Ryespy.configure do |c|
+        c.listener         = 'earear'
+        c.redis_ns_ryespy  = 'LittleEye:'
+      end
+      
+      @config = Ryespy.config
+    end
+    
+    it "returns key prefix" do
+      @config.redis_prefix_ryespy.must_equal "LittleEye:earear:"
+    end
+  end
+  
 end

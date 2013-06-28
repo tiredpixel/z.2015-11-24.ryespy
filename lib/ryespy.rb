@@ -47,25 +47,21 @@ module Ryespy
   end
   
   def check_listener
-    redis_prefix = "#{Ryespy.config.redis_ns_ryespy}#{Ryespy.config.listener}:"
-    
     begin
       Ryespy::RedisConn.new(Ryespy.config.redis_url) do |redis|
-        Ryespy.send("check_#{Ryespy.config.listener}", redis, redis_prefix)
+        Ryespy.send("check_#{Ryespy.config.listener}", redis)
       end
     ensure
       notifiers.each { |n| n.close }
     end
   end
   
-  def check_imap(redis, redis_prefix)
-    redis_prefix += "#{Ryespy.config.imap_host},#{Ryespy.config.imap_port}:#{Ryespy.config.imap_username}:"
-    
+  def check_imap(redis)
     Ryespy::Listener::IMAP.new do |listener|
       Ryespy.config.imap_mailboxes.each do |mailbox|
         Ryespy.logger.debug { "mailbox:#{mailbox}" }
         
-        redis_key = redis_prefix + "#{mailbox}"
+        redis_key = "#{Ryespy.config.redis_prefix_ryespy}#{Ryespy.config.imap_host},#{Ryespy.config.imap_port}:#{Ryespy.config.imap_username}:#{mailbox}"
         
         Ryespy.logger.debug { "redis_key:#{redis_key}" }
         
@@ -87,14 +83,12 @@ module Ryespy
     end
   end
   
-  def check_ftp(redis, redis_prefix)
-    redis_prefix += "#{Ryespy.config.ftp_host}:#{Ryespy.config.ftp_username}:"
-    
+  def check_ftp(redis)
     Ryespy::Listener::FTP.new do |listener|
       Ryespy.config.ftp_dirs.each do |dir|
         Ryespy.logger.debug { "dir:#{dir}" }
         
-        redis_key = redis_prefix + "#{dir}"
+        redis_key = "#{Ryespy.config.redis_prefix_ryespy}#{Ryespy.config.ftp_host}:#{Ryespy.config.ftp_username}:#{dir}"
         
         Ryespy.logger.debug { "redis_key:#{redis_key}" }
         
