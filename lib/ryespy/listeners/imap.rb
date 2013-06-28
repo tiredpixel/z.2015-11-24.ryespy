@@ -27,8 +27,6 @@ module Ryespy
       end
       
       def close
-        @imap.logout
-        
         @imap.disconnect
       end
       
