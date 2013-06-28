@@ -48,64 +48,66 @@ module Ryespy
   
   def check_listener
     begin
-      Ryespy::RedisConn.new(Ryespy.config.redis_url) do |redis|
-        Ryespy.send("check_#{Ryespy.config.listener}", redis)
-      end
+      Ryespy.send("check_#{Ryespy.config.listener}")
     ensure
       notifiers.each { |n| n.close }
     end
   end
   
-  def check_imap(redis)
-    Ryespy::Listener::IMAP.new do |listener|
-      Ryespy.config.imap_mailboxes.each do |mailbox|
-        Ryespy.logger.debug { "mailbox:#{mailbox}" }
-        
-        redis_key = "#{Ryespy.config.redis_prefix_ryespy}#{Ryespy.config.imap_host},#{Ryespy.config.imap_port}:#{Ryespy.config.imap_username}:#{mailbox}"
-        
-        Ryespy.logger.debug { "redis_key:#{redis_key}" }
-        
-        new_items = listener.check({
-          :mailbox       => mailbox,
-          :last_seen_uid => redis.get(redis_key).to_i,
-        })
-        
-        Ryespy.logger.debug { "new_items:#{new_items}" }
-        
-        new_items.each do |uid|
-          redis.set(redis_key, uid)
+  def check_imap
+    Ryespy::RedisConn.new(Ryespy.config.redis_url) do |redis|
+      Ryespy::Listener::IMAP.new do |listener|
+        Ryespy.config.imap_mailboxes.each do |mailbox|
+          Ryespy.logger.debug { "mailbox:#{mailbox}" }
           
-          notifiers.each { |n| n.notify('RyespyIMAPJob', [mailbox, uid]) }
+          redis_key = "#{Ryespy.config.redis_prefix_ryespy}#{Ryespy.config.imap_host},#{Ryespy.config.imap_port}:#{Ryespy.config.imap_username}:#{mailbox}"
+          
+          Ryespy.logger.debug { "redis_key:#{redis_key}" }
+          
+          new_items = listener.check({
+            :mailbox       => mailbox,
+            :last_seen_uid => redis.get(redis_key).to_i,
+          })
+          
+          Ryespy.logger.debug { "new_items:#{new_items}" }
+          
+          new_items.each do |uid|
+            redis.set(redis_key, uid)
+            
+            notifiers.each { |n| n.notify('RyespyIMAPJob', [mailbox, uid]) }
+          end
+          
+          Ryespy.logger.info { "#{mailbox} has #{new_items.count} new emails" }
         end
-        
-        Ryespy.logger.info { "#{mailbox} has #{new_items.count} new emails" }
       end
     end
   end
   
-  def check_ftp(redis)
-    Ryespy::Listener::FTP.new do |listener|
-      Ryespy.config.ftp_dirs.each do |dir|
-        Ryespy.logger.debug { "dir:#{dir}" }
-        
-        redis_key = "#{Ryespy.config.redis_prefix_ryespy}#{Ryespy.config.ftp_host}:#{Ryespy.config.ftp_username}:#{dir}"
-        
-        Ryespy.logger.debug { "redis_key:#{redis_key}" }
-        
-        new_items = listener.check({
-          :dir        => dir,
-          :seen_files => redis.hgetall(redis_key),
-        })
-        
-        Ryespy.logger.debug { "new_items:#{new_items}" }
-        
-        new_items.each do |filename, checksum|
-          redis.hset(redis_key, filename, checksum)
+  def check_ftp
+    Ryespy::RedisConn.new(Ryespy.config.redis_url) do |redis|
+      Ryespy::Listener::FTP.new do |listener|
+        Ryespy.config.ftp_dirs.each do |dir|
+          Ryespy.logger.debug { "dir:#{dir}" }
           
-          notifiers.each { |n| n.notify('RyespyFTPJob', [dir, filename]) }
+          redis_key = "#{Ryespy.config.redis_prefix_ryespy}#{Ryespy.config.ftp_host}:#{Ryespy.config.ftp_username}:#{dir}"
+          
+          Ryespy.logger.debug { "redis_key:#{redis_key}" }
+          
+          new_items = listener.check({
+            :dir        => dir,
+            :seen_files => redis.hgetall(redis_key),
+          })
+          
+          Ryespy.logger.debug { "new_items:#{new_items}" }
+          
+          new_items.each do |filename, checksum|
+            redis.hset(redis_key, filename, checksum)
+            
+            notifiers.each { |n| n.notify('RyespyFTPJob', [dir, filename]) }
+          end
+          
+          Ryespy.logger.info { "#{dir} has #{new_items.count} new files" }
         end
-        
-        Ryespy.logger.info { "#{dir} has #{new_items.count} new files" }
       end
     end
   end
