@@ -177,7 +177,12 @@ end
 # = Main loop
 
 loop do
-  Ryespy.check_listener
+  listener = {
+    'imap' => Ryespy::Listener::IMAP,
+    'ftp'  => Ryespy::Listener::FTP,
+  }[Ryespy.config.listener.to_s].new
+  
+  listener.check_all
   
   break unless options[:eternal]
   
