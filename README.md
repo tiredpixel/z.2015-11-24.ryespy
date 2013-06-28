@@ -10,6 +10,8 @@ it's sometimes possible to inspire oneself. Ryespy with my little eye.
 
 More sleep lost by [tiredpixel](http://www.tiredpixel.com).
 
+[![Build Status](https://travis-ci.org/tiredpixel/ryespy.png?branch=master,develop)](https://travis-ci.org/tiredpixel/ryespy)
+
 
 ## Installation
 
