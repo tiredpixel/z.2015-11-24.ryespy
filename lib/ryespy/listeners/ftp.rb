@@ -56,6 +56,31 @@ module Ryespy
         end
       end
       
+      def check_all
+        Ryespy.config.ftp_dirs.each do |dir|
+          Ryespy.logger.debug { "dir:#{dir}" }
+          
+          redis_key = "#{Ryespy.config.redis_prefix_ryespy}#{Ryespy.config.ftp_host}:#{Ryespy.config.ftp_username}:#{dir}"
+          
+          Ryespy.logger.debug { "redis_key:#{redis_key}" }
+          
+          new_items = check({
+            :dir        => dir,
+            :seen_files => Ryespy.redis.hgetall(redis_key),
+          })
+          
+          Ryespy.logger.debug { "new_items:#{new_items}" }
+          
+          new_items.each do |filename, checksum|
+            Ryespy.redis.hset(redis_key, filename, checksum)
+            
+            Ryespy.notifiers.each { |n| n.notify('RyespyFTPJob', [dir, filename]) }
+          end
+          
+          Ryespy.logger.info { "#{dir} has #{new_items.count} new files" }
+        end
+      end
+      
     end
   end
 end

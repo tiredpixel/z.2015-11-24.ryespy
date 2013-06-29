@@ -48,6 +48,10 @@ OptionParser.new do |opts|
     options[:redis_ns_ryespy] = o
   end
   
+  opts.on("--redis-ns-notifiers [NS]", "Namespace notifiers Redis 'resque:' as NS") do |o|
+    options[:redis_ns_notifiers] = o
+  end
+  
   opts.separator ""
   opts.separator "Listener imap:"
   
@@ -143,11 +147,12 @@ Ryespy.configure do |c|
     :polling_interval,
     :redis_url,
     :redis_ns_ryespy,
+    :redis_ns_notifiers,
     :notifiers,
   ]
   
-  params.concat case c.listener
-  when :imap
+  params.concat case c.listener.to_s
+  when 'imap'
     [
       :imap_host,
       :imap_port,
@@ -156,7 +161,7 @@ Ryespy.configure do |c|
       :imap_password,
       :imap_mailboxes,
     ]
-  when :ftp
+  when 'ftp'
     [
       :ftp_host,
       :ftp_passive,
@@ -177,7 +182,12 @@ end
 # = Main loop
 
 loop do
-  Ryespy.check_listener
+  listener = {
+    'imap' => Ryespy::Listener::IMAP,
+    'ftp'  => Ryespy::Listener::FTP,
+  }[Ryespy.config.listener.to_s].new
+  
+  listener.check_all
   
   break unless options[:eternal]
   

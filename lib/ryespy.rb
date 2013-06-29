@@ -34,80 +34,20 @@ module Ryespy
     @logger
   end
   
-  def check_listener
-    redis_prefix = "#{Ryespy.config.redis_ns_ryespy}#{Ryespy.config.listener}:"
-    
-    notifiers = []
-    
-    begin
-      Ryespy.config.notifiers[:sidekiq].each do |notifier_instance|
-        notifiers << Ryespy::Notifier::Sidekiq.new(notifier_instance)
-      end
+  def redis
+    @redis ||= Ryespy::RedisConn.new(Ryespy.config.redis_url).redis
+  end
+  
+  def notifiers
+    unless @notifiers
+      @notifiers = []
       
-      Ryespy::RedisConn.new(Ryespy.config.redis_url) do |redis|
-        Ryespy.send("check_#{Ryespy.config.listener}", redis, redis_prefix, notifiers)
+      Ryespy.config.notifiers[:sidekiq].each do |notifier_instance|
+        @notifiers << Ryespy::Notifier::Sidekiq.new(notifier_instance)
       end
-    ensure
-      notifiers.each { |n| n.close }
     end
-  end
-  
-  def check_imap(redis, redis_prefix, notifiers)
-    redis_prefix += "#{Ryespy.config.imap_host},#{Ryespy.config.imap_port}:#{Ryespy.config.imap_username}:"
     
-    Ryespy::Listener::IMAP.new do |listener|
-      Ryespy.config.imap_mailboxes.each do |mailbox|
-        Ryespy.logger.debug { "mailbox:#{mailbox}" }
-        
-        redis_key = redis_prefix + "#{mailbox}"
-        
-        Ryespy.logger.debug { "redis_key:#{redis_key}" }
-        
-        new_items = listener.check({
-          :mailbox       => mailbox,
-          :last_seen_uid => redis.get(redis_key).to_i,
-        })
-        
-        Ryespy.logger.debug { "new_items:#{new_items}" }
-        
-        new_items.each do |uid|
-          redis.set(redis_key, uid)
-          
-          notifiers.each { |n| n.notify('RyespyIMAPJob', [mailbox, uid]) }
-        end
-        
-        Ryespy.logger.info { "#{mailbox} has #{new_items.count} new emails" }
-      end
-    end
-  end
-  
-  def check_ftp(redis, redis_prefix, notifiers)
-    redis_prefix += "#{Ryespy.config.ftp_host}:#{Ryespy.config.ftp_username}:"
-    
-    Ryespy::Listener::FTP.new do |listener|
-      Ryespy.config.ftp_dirs.each do |dir|
-        Ryespy.logger.debug { "dir:#{dir}" }
-        
-        redis_key = redis_prefix + "#{dir}"
-        
-        Ryespy.logger.debug { "redis_key:#{redis_key}" }
-        
-        new_items = listener.check({
-          :dir        => dir,
-          :seen_files => redis.hgetall(redis_key),
-        })
-        
-        Ryespy.logger.debug { "new_items:#{new_items}" }
-        
-        new_items.each do |filename, checksum|
-          redis.hset(redis_key, filename, checksum)
-          
-          notifiers.each { |n| n.notify('RyespyFTPJob', [dir, filename]) }
-        end
-        
-        Ryespy.logger.info { "#{dir} has #{new_items.count} new files" }
-      end
-    end
+    @notifiers
   end
   
 end

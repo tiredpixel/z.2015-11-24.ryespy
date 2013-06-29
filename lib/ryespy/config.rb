@@ -6,6 +6,7 @@ module Ryespy
     attr_accessor :polling_interval
     attr_accessor :redis_url
     attr_accessor :redis_ns_ryespy
+    attr_accessor :redis_ns_notifiers
     attr_accessor :notifiers
     
     attr_accessor :imap_host
@@ -22,10 +23,11 @@ module Ryespy
     attr_accessor :ftp_dirs
     
     def initialize
-      @log_level        = 'INFO'
-      @polling_interval = 60
-      @redis_ns_ryespy  = 'ryespy:'
-      @notifiers        = {
+      @log_level          = 'INFO'
+      @polling_interval   = 60
+      @redis_ns_ryespy    = 'ryespy:'
+      @redis_ns_notifiers = 'resque:'
+      @notifiers          = {
         :sidekiq => [],
       }
       
@@ -44,11 +46,12 @@ module Ryespy
         :polling_interval,
         :redis_url,
         :redis_ns_ryespy,
+        :redis_ns_notifiers,
         :notifiers,
       ]
       
-      params.concat case @listener
-      when :imap
+      params.concat case @listener.to_s
+      when 'imap'
         [
           :imap_host,
           :imap_port,
@@ -56,7 +59,7 @@ module Ryespy
           :imap_username,
           :imap_password,
         ]
-      when :ftp
+      when 'ftp'
         [
           :ftp_host,
           :ftp_passive,
@@ -70,6 +73,10 @@ module Ryespy
       params.collect! { |s| [s, instance_variable_get("@#{s}")] }
       
       Hash[params].to_s
+    end
+    
+    def redis_prefix_ryespy
+      "#{Ryespy.config.redis_ns_ryespy}#{Ryespy.config.listener}:"
     end
     
   end

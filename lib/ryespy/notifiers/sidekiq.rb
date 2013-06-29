@@ -8,8 +8,7 @@ module Ryespy
   module Notifier
     class Sidekiq
       
-      REDIS_NS_RESQUE = 'resque'
-      RESQUE_QUEUE    = 'ryespy'
+      RESQUE_QUEUE = 'ryespy'
       
       def initialize(url = nil)
         begin
@@ -32,9 +31,9 @@ module Ryespy
       end
       
       def notify(job_class, args)
-        @redis_conn.redis.sadd("#{REDIS_NS_RESQUE}:queues", RESQUE_QUEUE)
+        @redis_conn.redis.sadd("#{Ryespy.config.redis_ns_notifiers}queues", RESQUE_QUEUE)
         
-        @redis_conn.redis.rpush("#{REDIS_NS_RESQUE}:queue:#{RESQUE_QUEUE}", {
+        @redis_conn.redis.rpush("#{Ryespy.config.redis_ns_notifiers}queue:#{RESQUE_QUEUE}", {
           # resque
           :class => job_class,
           :args  => args,
