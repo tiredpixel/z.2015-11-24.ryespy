@@ -23,6 +23,10 @@ describe Ryespy::Config do
       @config.redis_ns_ryespy.must_equal 'ryespy:'
     end
     
+    it "sets redis_ns_notifiers to resque:" do
+      @config.redis_ns_notifiers.must_equal 'resque:'
+    end
+    
     it "sets notifiers hash structure" do
       @config.notifiers.must_equal({ :sidekiq => [] })
     end
@@ -51,12 +55,13 @@ describe Ryespy::Config do
   describe "configure block main" do
     before do
       Ryespy.configure do |c|
-        c.log_level        = 'ERROR'
-        c.listener         = 'imap'
-        c.polling_interval = 13
-        c.redis_url        = 'redis://127.0.0.1:6379/1'
-        c.redis_ns_ryespy  = 'WithMyLittleEye!'
-        c.notifiers        = [{ :sidekiq => 'redis://127.0.0.1:6379/2' }]
+        c.log_level           = 'ERROR'
+        c.listener            = 'imap'
+        c.polling_interval    = 13
+        c.redis_url           = 'redis://127.0.0.1:6379/1'
+        c.redis_ns_ryespy     = 'WithMyLittleEye!'
+        c.redis_ns_notifiers  = 'LaLaLiLi-'
+        c.notifiers           = [{ :sidekiq => 'redis://127.0.0.1:6379/2' }]
       end
       
       @config = Ryespy.config
@@ -80,6 +85,10 @@ describe Ryespy::Config do
     
     it "configures redis_ns_ryespy" do
       @config.redis_ns_ryespy.must_equal 'WithMyLittleEye!'
+    end
+    
+    it "configures redis_ns_notifiers" do
+      @config.redis_ns_notifiers.must_equal 'LaLaLiLi-'
     end
     
     it "configures notifiers" do
@@ -171,7 +180,7 @@ describe Ryespy::Config do
       end
       
       it "stringifies hash of config" do
-        @config.to_s.must_equal '{:log_level=>"INFO", :listener=>nil, :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy:", :notifiers=>{:sidekiq=>[]}}'
+        @config.to_s.must_equal '{:log_level=>"INFO", :listener=>nil, :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy:", :redis_ns_notifiers=>"resque:", :notifiers=>{:sidekiq=>[]}}'
       end
     end
     
@@ -181,7 +190,7 @@ describe Ryespy::Config do
       end
       
       it "stringifies hash of config" do
-        @config.to_s.must_equal '{:log_level=>"INFO", :listener=>"imap", :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy:", :notifiers=>{:sidekiq=>[]}, :imap_host=>nil, :imap_port=>993, :imap_ssl=>true, :imap_username=>nil, :imap_password=>nil}'
+        @config.to_s.must_equal '{:log_level=>"INFO", :listener=>"imap", :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy:", :redis_ns_notifiers=>"resque:", :notifiers=>{:sidekiq=>[]}, :imap_host=>nil, :imap_port=>993, :imap_ssl=>true, :imap_username=>nil, :imap_password=>nil}'
       end
     end
     
@@ -191,7 +200,7 @@ describe Ryespy::Config do
       end
       
       it "stringifies hash of config" do
-        @config.to_s.must_equal '{:log_level=>"INFO", :listener=>"ftp", :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy:", :notifiers=>{:sidekiq=>[]}, :ftp_host=>nil, :ftp_passive=>false, :ftp_username=>nil, :ftp_dirs=>["/"]}'
+        @config.to_s.must_equal '{:log_level=>"INFO", :listener=>"ftp", :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy:", :redis_ns_notifiers=>"resque:", :notifiers=>{:sidekiq=>[]}, :ftp_host=>nil, :ftp_passive=>false, :ftp_username=>nil, :ftp_dirs=>["/"]}'
       end
     end
   end

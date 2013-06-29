@@ -48,6 +48,10 @@ OptionParser.new do |opts|
     options[:redis_ns_ryespy] = o
   end
   
+  opts.on("--redis-ns-notifiers [NS]", "Namespace notifiers Redis 'resque:' as NS") do |o|
+    options[:redis_ns_notifiers] = o
+  end
+  
   opts.separator ""
   opts.separator "Listener imap:"
   
@@ -143,6 +147,7 @@ Ryespy.configure do |c|
     :polling_interval,
     :redis_url,
     :redis_ns_ryespy,
+    :redis_ns_notifiers,
     :notifiers,
   ]
   
