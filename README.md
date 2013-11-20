@@ -44,6 +44,15 @@ than one IMAP mailbox or FTP directory. The `--help` is most helpful.
 Use `--eternal` to run eternally.
 
 
+## Stay Tuned
+
+We have a [Librelist](http://librelist.com) mailing list!
+To subscribe, send an email to <ryespy@librelist.com>.
+To unsubscribe, send an email to <ryespy-unsubscribe@librelist.com>.
+There be [archives](http://librelist.com/browser/ryespy/).
+That was easy.
+
+
 ## Growing Like Flowers
 
 Coming soon is a grand refactor sprinkled with lots of testing, ensuring that
