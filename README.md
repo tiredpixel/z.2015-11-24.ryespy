@@ -1,5 +1,9 @@
 # Ryespy
 
+[![Gem Version](https://badge.fury.io/rb/ryespy.png)](http://badge.fury.io/rb/ryespy)
+[![Build Status](https://travis-ci.org/tiredpixel/ryespy.png?branch=master,stable)](https://travis-ci.org/tiredpixel/ryespy)
+[![Code Climate](https://codeclimate.com/github/tiredpixel/ryespy.png)](https://codeclimate.com/github/tiredpixel/ryespy)
+
 Ryespy provides a simple executable for listening to IMAP mailboxes or FTP
 folders, keeps track of what it's seen using Redis, and notifies Redis in a way
 in which [Resque](https://github.com/resque/resque) and
@@ -9,8 +13,6 @@ Ryespy was inspired by [Redimap](https://github.com/tiredpixel/redimap). Yes,
 it's sometimes possible to inspire oneself. Ryespy with my little eye.
 
 More sleep lost by [tiredpixel](http://www.tiredpixel.com).
-
-[![Build Status](https://travis-ci.org/tiredpixel/ryespy.png?branch=master,stable)](https://travis-ci.org/tiredpixel/ryespy)
 
 
 ## Installation
