@@ -2,4 +2,13 @@ language: ruby
 rvm:
   - 2.0.0
   - 1.9.3
-  - 1.9.2
+  - jruby-19mode
+  - rbx-19mode
+notifications:
+  email:
+    recipients:
+      - tp@tiredpixel.com
+matrix:
+  allow_failures:
+    - rvm: jruby-19mode
+    - rvm: rbx-19mode
