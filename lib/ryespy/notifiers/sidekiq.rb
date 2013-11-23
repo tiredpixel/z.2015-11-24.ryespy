@@ -16,7 +16,7 @@ module Ryespy
         @logger = opts[:logger] || Logger.new(nil)
         
         begin
-          @redis_conn = Ryespy::RedisConn.new(url,
+          @redis_conn = RedisConn.new(url,
             :logger => @logger
           )
         rescue Errno::ECONNREFUSED, Net::FTPError => e

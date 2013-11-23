@@ -25,7 +25,7 @@ module Ryespy
     end
     
     def redis
-      @redis ||= Ryespy::RedisConn.new(config.redis_url,
+      @redis ||= RedisConn.new(config.redis_url,
         :logger => logger
       ).redis
     end
@@ -35,7 +35,7 @@ module Ryespy
         @notifiers = []
         
         config.notifiers[:sidekiq].each do |notifier_instance|
-          @notifiers << Ryespy::Notifier::Sidekiq.new(notifier_instance,
+          @notifiers << Notifier::Sidekiq.new(notifier_instance,
             :config => config,
             :logger => logger
           )
