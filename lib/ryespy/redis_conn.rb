@@ -1,3 +1,4 @@
+require 'logger'
 require 'redis'
 
 
@@ -6,13 +7,15 @@ module Ryespy
     
     attr_accessor :redis
     
-    def initialize(url = nil)
+    def initialize(url = nil, opts = {})
+      @logger = opts[:logger] || Logger.new(nil)
+      
       begin
         @redis = Redis.connect(:url => url)
         
         @redis.ping
       rescue Redis::CannotConnectError => e
-        Ryespy.logger.error { e.to_s }
+        @logger.error { e.to_s }
         
         return
       end

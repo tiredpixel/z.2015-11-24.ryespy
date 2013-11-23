@@ -1,3 +1,4 @@
+require 'logger'
 require 'net/imap'
 
 
@@ -5,16 +6,21 @@ module Ryespy
   module Listener
     class IMAP
       
-      def initialize
+      def initialize(opts = {})
+        @config    = opts[:config] || Config.new
+        @redis     = opts[:redis] || RedisConn.new
+        @notifiers = opts[:notifiers] || []
+        @logger    = opts[:logger] || Logger.new(nil)
+        
         begin
-          @imap = Net::IMAP.new(Ryespy.config.imap_host, {
-            :port => Ryespy.config.imap_port,
-            :ssl  => Ryespy.config.imap_ssl,
+          @imap = Net::IMAP.new(@config.imap_host, {
+            :port => @config.imap_port,
+            :ssl  => @config.imap_ssl,
           })
           
-          @imap.login(Ryespy.config.imap_username, Ryespy.config.imap_password)
+          @imap.login(@config.imap_username, @config.imap_password)
         rescue Errno::ECONNREFUSED, Net::IMAP::Error => e
-          Ryespy.logger.error { e.to_s }
+          @logger.error { e.to_s }
           
           return
         end
@@ -38,34 +44,34 @@ module Ryespy
           
           uids.find_all { |uid| uid > params[:last_seen_uid] } # IMAP search gets fun with edge cases
         rescue Net::IMAP::Error => e
-          Ryespy.logger.error { e.to_s }
+          @logger.error { e.to_s }
           
           return
         end
       end
       
       def check_all
-        Ryespy.config.imap_mailboxes.each do |mailbox|
-          Ryespy.logger.debug { "mailbox:#{mailbox}" }
+        @config.imap_mailboxes.each do |mailbox|
+          @logger.debug { "mailbox:#{mailbox}" }
           
-          redis_key = "#{Ryespy.config.redis_prefix_ryespy}#{Ryespy.config.imap_host},#{Ryespy.config.imap_port}:#{Ryespy.config.imap_username}:#{mailbox}"
+          redis_key = "#{@config.redis_prefix_ryespy}#{@config.imap_host},#{@config.imap_port}:#{@config.imap_username}:#{mailbox}"
           
-          Ryespy.logger.debug { "redis_key:#{redis_key}" }
+          @logger.debug { "redis_key:#{redis_key}" }
           
           new_items = check({
             :mailbox       => mailbox,
-            :last_seen_uid => Ryespy.redis.get(redis_key).to_i,
+            :last_seen_uid => @redis.get(redis_key).to_i,
           })
           
-          Ryespy.logger.debug { "new_items:#{new_items}" }
+          @logger.debug { "new_items:#{new_items}" }
           
           new_items.each do |uid|
-            Ryespy.redis.set(redis_key, uid)
+            @redis.set(redis_key, uid)
             
-            Ryespy.notifiers.each { |n| n.notify('RyespyIMAPJob', [mailbox, uid]) }
+            @notifiers.each { |n| n.notify('RyespyIMAPJob', [mailbox, uid]) }
           end
           
-          Ryespy.logger.info { "#{mailbox} has #{new_items.count} new emails" }
+          @logger.info { "#{mailbox} has #{new_items.count} new emails" }
         end
       end
       
