@@ -1,12 +1,29 @@
 require_relative '../helper'
 
-require_relative '../../lib/ryespy/app'
+require_relative '../../lib/ryespy'
+
+
+def start_and_stop_app(app)
+  app_thread = Thread.new { app.start }
+  
+  sleep 1 # patience, patience; give app time to start
+  
+  app.stop
+  
+  app_thread.join(2)
+  
+  Thread.kill(app_thread)
+end
 
 
 describe Ryespy::App do
   
   before do
-    @app = Ryespy::App.new
+    @app = Ryespy::App.new(true)
+  end
+  
+  it "sets status not-running" do
+    @app.running.must_equal false
   end
   
   describe "configure block main" do
@@ -123,6 +140,62 @@ describe Ryespy::App do
     
     it "configures ftp_dirs" do
       @config.ftp_dirs.must_equal ['BoxA', 'Sent Messages']
+    end
+  end
+  
+  describe "#start" do
+    before do
+      @app.configure do |c|
+        c.polling_interval = 10
+      end
+    end
+    
+    it "sets status running within 1s" do
+      thread_app = Thread.new { @app.start }
+      
+      sleep 1 # patience, patience; give app time to start
+      
+      @app.running.must_equal true
+      
+      Thread.kill(thread_app)
+    end
+    
+    it "stops running within 1s" do
+      thread_app = Thread.new { @app.start }
+      
+      sleep 1 # patience, patience; give app time to start
+      
+      @app.stop; t0 = Time.now
+      
+      thread_app.join(2)
+      
+      Thread.kill(thread_app)
+      
+      assert_operator (Time.now - t0), :<=, 1
+    end
+    
+    it "calls #setup hook" do
+      @app.expects(:setup)
+      
+      start_and_stop_app(@app)
+    end
+    
+    it "calls #cleanup hook" do
+      @app.expects(:cleanup)
+      
+      start_and_stop_app(@app)
+    end
+  end
+  
+  describe "#stop" do
+    before do
+      @app.instance_variable_set(:@running, true)
+    end
+    
+    it "sets status not-running" do
+      @app.stop
+      
+      @app.running.must_equal false
     end
   end
   

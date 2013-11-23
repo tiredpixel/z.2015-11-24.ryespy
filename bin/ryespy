@@ -147,7 +147,7 @@ end
 
 # = Create app
 
-@app = Ryespy::App.new
+@app = Ryespy::App.new(options[:eternal])
 
 
 # = Configure
@@ -191,24 +191,18 @@ end
 end
 
 
-# = Main loop
+# = Run app
 
-loop do
-  listener = {
-    'imap' => Ryespy::Listener::IMAP,
-    'ftp'  => Ryespy::Listener::FTP,
-  }[@app.config.listener.to_s].new(
-    :config    => @app.config,
-    :redis     => @app.redis,
-    :notifiers => @app.notifiers,
-    :logger    => @app.logger
-  )
+trap('INT') { @app.stop }
+
+begin
+  @app.start
+rescue => e
+  warn "#{$0}: #{e}"
   
-  listener.check_all
-  
-  break unless options[:eternal]
-  
-  @app.logger.debug { "Snoring for #{@app.config.polling_interval} s" }
-  
-  sleep @app.config.polling_interval # sleep awhile (snore)
+  if options[:verbose]
+    raise # reraise for stacktrace
+  else
+    exit 1 # same non-zero status as when --debug
+  end
 end

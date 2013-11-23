@@ -4,6 +4,14 @@ require 'logger'
 module Ryespy
   class App
     
+    attr_reader :running
+    
+    def initialize(eternal = false)
+      @eternal = eternal
+      @running = false
+      @threads = {}
+    end
+    
     def config
       @config ||= Config.new
     end
@@ -43,6 +51,61 @@ module Ryespy
       end
       
       @notifiers
+    end
+    
+    def start
+      begin
+        @running = true
+        
+        setup
+        
+        @threads[:refresh] ||= Thread.new do
+          refresh_loop # refresh frequently
+        end
+        
+        @threads.values.each(&:join)
+      ensure
+        cleanup
+      end
+    end
+    
+    def stop
+      @running = false
+      
+      @threads.values.each { |t| t.run if t.status == 'sleep' }
+    end
+    
+    private
+    
+    def setup
+      @listener = {
+        'imap' => Listener::IMAP,
+        'ftp'  => Listener::FTP,
+      }[config.listener.to_s].new(
+        :config    => config,
+        :redis     => redis,
+        :notifiers => notifiers,
+        :logger    => logger
+      ) if config.listener
+    end
+    
+    def cleanup
+    end
+    
+    def refresh_loop
+      while @running do
+        @listener.check_all if @listener
+        
+        if !@eternal
+          stop
+          
+          break
+        end
+        
+        logger.debug { "Snoring for #{config.polling_interval} s" }
+        
+        sleep config.polling_interval # sleep awhile (snore)
+      end
     end
     
   end
