@@ -136,9 +136,14 @@ end.parse!
 end
 
 
+# = Create app
+
+@app = Ryespy::App.new
+
+
 # = Configure
 
-Ryespy.configure do |c|
+@app.configure do |c|
   c.log_level = 'DEBUG' if options[:verbose]
   
   c.listener = options[:listener]
@@ -176,8 +181,6 @@ Ryespy.configure do |c|
   params.each { |s| c.send("#{s}=", options[s]) unless options[s].nil? }
 end
 
-@logger = Ryespy.logger
-
 
 # = Main loop
 
@@ -185,13 +188,18 @@ loop do
   listener = {
     'imap' => Ryespy::Listener::IMAP,
     'ftp'  => Ryespy::Listener::FTP,
-  }[Ryespy.config.listener.to_s].new
+  }[@app.config.listener.to_s].new(
+    :config    => @app.config,
+    :redis     => @app.redis,
+    :notifiers => @app.notifiers,
+    :logger    => @app.logger
+  )
   
   listener.check_all
   
   break unless options[:eternal]
   
-  @logger.debug { "Snoring for #{Ryespy.config.polling_interval} s" }
+  @app.logger.debug { "Snoring for #{@app.config.polling_interval} s" }
   
-  sleep Ryespy.config.polling_interval # sleep awhile (snore)
+  sleep @app.config.polling_interval # sleep awhile (snore)
 end

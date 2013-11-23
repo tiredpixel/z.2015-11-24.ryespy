@@ -76,7 +76,7 @@ module Ryespy
     end
     
     def redis_prefix_ryespy
-      "#{Ryespy.config.redis_ns_ryespy}#{Ryespy.config.listener}:"
+      "#{@redis_ns_ryespy}#{@listener}:"
     end
     
   end

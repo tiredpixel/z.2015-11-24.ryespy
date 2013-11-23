@@ -1,3 +1,4 @@
+require 'logger'
 require 'json'
 require 'securerandom'
 
@@ -10,11 +11,16 @@ module Ryespy
       
       RESQUE_QUEUE = 'ryespy'
       
-      def initialize(url = nil)
+      def initialize(url = nil, opts = {})
+        @config = opts[:config] || Config.new
+        @logger = opts[:logger] || Logger.new(nil)
+        
         begin
-          @redis_conn = Ryespy::RedisConn.new(url)
+          @redis_conn = Ryespy::RedisConn.new(url,
+            :logger => @logger
+          )
         rescue Errno::ECONNREFUSED, Net::FTPError => e
-          Ryespy.logger.error { e.to_s }
+          @logger.error { e.to_s }
           
           return
         end
@@ -31,9 +37,9 @@ module Ryespy
       end
       
       def notify(job_class, args)
-        @redis_conn.redis.sadd("#{Ryespy.config.redis_ns_notifiers}queues", RESQUE_QUEUE)
+        @redis_conn.redis.sadd("#{@config.redis_ns_notifiers}queues", RESQUE_QUEUE)
         
-        @redis_conn.redis.rpush("#{Ryespy.config.redis_ns_notifiers}queue:#{RESQUE_QUEUE}", {
+        @redis_conn.redis.rpush("#{@config.redis_ns_notifiers}queue:#{RESQUE_QUEUE}", {
           # resque
           :class => job_class,
           :args  => args,
