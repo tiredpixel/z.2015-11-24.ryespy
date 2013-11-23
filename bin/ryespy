@@ -17,7 +17,12 @@ options.notifiers = {
 }
 
 OptionParser.new do |opts|
-  opts.banner = "Usage: ryespy [options]"
+  opts.version = "v#{Ryespy::VERSION}"
+  
+  opts.banner = opts.ver
+  
+  opts.separator ""
+  opts.separator "Usage: ryespy [OPTIONS]"
   
   opts.separator ""
   opts.separator "Listener:"
@@ -116,13 +121,17 @@ OptionParser.new do |opts|
     options[:verbose] = o
   end
   
-  opts.on_tail("--help", "Show this message") do
+  opts.on_tail("--help",
+    "Output (this) help and exit"
+  ) do
     puts opts
     exit
   end
   
-  opts.on_tail("--version", "Show version") do
-    puts "Ryespy version:#{Ryespy::VERSION}"
+  opts.on_tail("--version",
+    "Output version and exit"
+  ) do
+    puts opts.ver
     exit
   end
 end.parse!
