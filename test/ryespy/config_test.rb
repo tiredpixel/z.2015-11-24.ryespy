@@ -5,48 +5,48 @@ require_relative '../../lib/ryespy/config'
 
 describe Ryespy::Config do
   
-  describe "default" do
+  describe "#initialize" do
     before do
       @config = Ryespy::Config.new
     end
     
-    it "sets log_level to INFO" do
+    it "defaults log_level to INFO" do
       @config.log_level.must_equal 'INFO'
     end
     
-    it "sets polling_interval to 60" do
+    it "defaults polling_interval to 60" do
       @config.polling_interval.must_equal 60
     end
     
-    it "sets redis_ns_ryespy to ryespy:" do
+    it "defaults redis_ns_ryespy to ryespy:" do
       @config.redis_ns_ryespy.must_equal 'ryespy:'
     end
     
-    it "sets redis_ns_notifiers to resque:" do
+    it "defaults redis_ns_notifiers to resque:" do
       @config.redis_ns_notifiers.must_equal 'resque:'
     end
     
-    it "sets notifiers hash structure" do
+    it "defaults notifiers hash structure" do
       @config.notifiers.must_equal({ :sidekiq => [] })
     end
     
-    it "sets imap_port to 993" do
+    it "defaults imap_port to 993" do
       @config.imap_port.must_equal 993
     end
     
-    it "sets imap_ssl to true" do
+    it "defaults imap_ssl to true" do
       @config.imap_ssl.must_equal true
     end
     
-    it "sets imap_mailboxes to INBOX" do
+    it "defaults imap_mailboxes to INBOX" do
       @config.imap_mailboxes.must_equal ['INBOX']
     end
     
-    it "sets ftp_passive to false" do
+    it "defaults ftp_passive to false" do
       @config.ftp_passive.must_equal false
     end
     
-    it "sets ftp_dirs to /" do
+    it "defaults ftp_dirs to /" do
       @config.ftp_dirs.must_equal ['/']
     end
   end
