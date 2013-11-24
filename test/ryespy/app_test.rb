@@ -254,6 +254,8 @@ describe Ryespy::App do
       
       @app = Ryespy::App.new(true)
       
+      @app.instance_variable_set(:@logger, Logger.new(nil))
+      
       @app.configure do |c|
         c.listener         = :imap
         c.polling_interval = 10
