@@ -15,15 +15,9 @@ module Ryespy
         @config = opts[:config] || Config.new
         @logger = opts[:logger] || Logger.new(nil)
         
-        begin
-          @redis_conn = RedisConn.new(url,
-            :logger => @logger
-          )
-        rescue Errno::ECONNREFUSED, Net::FTPError => e
-          @logger.error { e.to_s }
-          
-          return
-        end
+        @redis_conn = RedisConn.new(url,
+          :logger => @logger
+        )
         
         if block_given?
           yield self
