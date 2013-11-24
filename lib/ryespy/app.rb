@@ -78,15 +78,6 @@ module Ryespy
     private
     
     def setup
-      @listener = {
-        'imap' => Listener::IMAP,
-        'ftp'  => Listener::FTP,
-      }[config.listener.to_s].new(
-        :config    => config,
-        :redis     => redis,
-        :notifiers => notifiers,
-        :logger    => logger
-      ) if config.listener
     end
     
     def cleanup
@@ -94,7 +85,17 @@ module Ryespy
     
     def refresh_loop
       while @running do
-        @listener.check_all if @listener
+        {
+          'imap' => Listener::IMAP,
+          'ftp'  => Listener::FTP,
+        }[config.listener.to_s].new(
+          :config    => config,
+          :redis     => redis,
+          :notifiers => notifiers,
+          :logger    => logger
+        ) do |listener|
+          listener.check_all
+        end
         
         if !@eternal
           stop

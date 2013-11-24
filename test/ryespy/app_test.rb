@@ -1,4 +1,5 @@
 require 'logger'
+require 'net/imap'
 
 
 require_relative '../helper'
@@ -244,9 +245,17 @@ describe Ryespy::App do
   
   describe "#start" do
     before do
+      Net::IMAP.stubs(:new).returns(stub(
+        :login      => nil,
+        :select     => nil,
+        :uid_search => [],
+        :disconnect => nil
+      ))
+      
       @app = Ryespy::App.new(true)
       
       @app.configure do |c|
+        c.listener         = :imap
         c.polling_interval = 10
       end
     end
