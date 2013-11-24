@@ -4,7 +4,7 @@ require_relative 'ryespy/config'
 require_relative 'ryespy/redis_conn'
 require_relative 'ryespy/app'
 
-require_relative 'ryespy/listeners/imap'
-require_relative 'ryespy/listeners/ftp'
+require_relative 'ryespy/listener/imap'
+require_relative 'ryespy/listener/ftp'
 
-require_relative 'ryespy/notifiers/sidekiq'
+require_relative 'ryespy/notifier/sidekiq'
