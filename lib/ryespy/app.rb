@@ -4,6 +4,7 @@ require 'logger'
 module Ryespy
   class App
     
+    attr_reader :config
     attr_reader :running
     
     def initialize(eternal = false, opts = {})
@@ -11,24 +12,22 @@ module Ryespy
       
       @logger = opts[:logger] || Logger.new(nil)
       
+      @config = Config.new
+      
       @running = false
       @threads = {}
     end
     
-    def config
-      @config ||= Config.new
-    end
-    
     def configure
-      yield config
+      yield @config
       
-      @logger.level = Logger.const_get(config.log_level)
+      @logger.level = Logger.const_get(@config.log_level)
       
-      @logger.debug { "Configured #{config.to_s}" }
+      @logger.debug { "Configured #{@config.to_s}" }
     end
     
     def redis
-      @redis ||= RedisConn.new(config.redis_url,
+      @redis ||= RedisConn.new(@config.redis_url,
         :logger => @logger
       ).redis
     end
@@ -37,9 +36,9 @@ module Ryespy
       unless @notifiers
         @notifiers = []
         
-        config.notifiers[:sidekiq].each do |notifier_instance|
+        @config.notifiers[:sidekiq].each do |notifier_instance|
           @notifiers << Notifier::Sidekiq.new(notifier_instance,
-            :config => config,
+            :config => @config,
             :logger => @logger
           )
         end
@@ -83,8 +82,8 @@ module Ryespy
         {
           'imap' => Listener::IMAP,
           'ftp'  => Listener::FTP,
-        }[config.listener.to_s].new(
-          :config    => config,
+        }[@config.listener.to_s].new(
+          :config    => @config,
           :redis     => redis,
           :notifiers => notifiers,
           :logger    => @logger
@@ -98,9 +97,9 @@ module Ryespy
           break
         end
         
-        @logger.debug { "Snoring for #{config.polling_interval} s" }
+        @logger.debug { "Snoring for #{@config.polling_interval} s" }
         
-        sleep config.polling_interval # sleep awhile (snore)
+        sleep @config.polling_interval # sleep awhile (snore)
       end
     end
     

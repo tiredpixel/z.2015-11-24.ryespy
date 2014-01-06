@@ -32,26 +32,6 @@ describe Ryespy::App do
     end
   end
   
-  describe "#config" do
-    before do
-      @app = Ryespy::App.new
-      
-      @app.instance_variable_set(:@config, nil)
-    end
-    
-    it "creates config when empty" do
-      @app.config.must_be_instance_of Ryespy::Config
-    end
-    
-    it "returns config when extant" do
-      @config = stub
-      
-      @app.instance_variable_set(:@config, @config)
-      
-      @app.config.must_equal @config
-    end
-  end
-  
   describe "#configure" do
     before do
       @app = Ryespy::App.new
