@@ -6,8 +6,11 @@ module Ryespy
     
     attr_reader :running
     
-    def initialize(eternal = false)
+    def initialize(eternal = false, opts = {})
       @eternal = eternal
+      
+      @logger = opts[:logger] || Logger.new(nil)
+      
       @running = false
       @threads = {}
     end
@@ -19,22 +22,14 @@ module Ryespy
     def configure
       yield config
       
-      logger.debug { "Configured #{config.to_s}" }
-    end
-    
-    def logger
-      unless @logger
-        @logger = Logger.new($stdout)
-        
-        @logger.level = Logger.const_get(config.log_level)
-      end
+      @logger.level = Logger.const_get(config.log_level)
       
-      @logger
+      @logger.debug { "Configured #{config.to_s}" }
     end
     
     def redis
       @redis ||= RedisConn.new(config.redis_url,
-        :logger => logger
+        :logger => @logger
       ).redis
     end
     
@@ -45,7 +40,7 @@ module Ryespy
         config.notifiers[:sidekiq].each do |notifier_instance|
           @notifiers << Notifier::Sidekiq.new(notifier_instance,
             :config => config,
-            :logger => logger
+            :logger => @logger
           )
         end
       end
@@ -92,7 +87,7 @@ module Ryespy
           :config    => config,
           :redis     => redis,
           :notifiers => notifiers,
-          :logger    => logger
+          :logger    => @logger
         ) do |listener|
           listener.check_all
         end
@@ -103,7 +98,7 @@ module Ryespy
           break
         end
         
-        logger.debug { "Snoring for #{config.polling_interval} s" }
+        @logger.debug { "Snoring for #{config.polling_interval} s" }
         
         sleep config.polling_interval # sleep awhile (snore)
       end

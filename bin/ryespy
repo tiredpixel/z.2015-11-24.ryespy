@@ -4,6 +4,7 @@ $stdout.sync = true
 
 require 'optparse'
 require 'ostruct'
+require 'logger'
 
 require File.expand_path(File.dirname(__FILE__) + '/../lib/ryespy')
 
@@ -147,7 +148,9 @@ end
 
 # = Create app
 
-@app = Ryespy::App.new(options[:eternal])
+@app = Ryespy::App.new(options[:eternal],
+  :logger => Logger.new($stdout)
+)
 
 
 # = Configure

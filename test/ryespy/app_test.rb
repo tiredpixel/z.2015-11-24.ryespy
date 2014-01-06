@@ -76,6 +76,10 @@ describe Ryespy::App do
         @config.log_level.must_equal 'ERROR'
       end
       
+      it "sets logger level" do
+        @app.instance_variable_get(:@logger).level.must_equal Logger::ERROR
+      end
+      
       it "configures listener" do
         @config.listener.must_equal 'imap'
       end
@@ -168,34 +172,6 @@ describe Ryespy::App do
       it "configures ftp_dirs" do
         @config.ftp_dirs.must_equal ['BoxA', 'Sent Messages']
       end
-    end
-  end
-  
-  describe "#logger" do
-    before do
-      @app = Ryespy::App.new
-      
-      @app.configure do |c|
-        c.log_level = 'WARN'
-      end
-      
-      @app.instance_variable_set(:@logger, nil)
-    end
-    
-    it "creates logger when empty" do
-      @app.logger.must_respond_to :log
-    end
-    
-    it "sets logger level when empty" do
-      @app.logger.level.must_equal Logger::WARN
-    end
-    
-    it "returns logger when extant" do
-      @logger = stub
-      
-      @app.instance_variable_set(:@logger, @logger)
-      
-      @app.logger.must_equal @logger
     end
   end
   
