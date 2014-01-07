@@ -1,8 +1,6 @@
-require 'logger'
+require 'redis'
 require 'json'
 require 'securerandom'
-
-require_relative '../redis_conn'
 
 
 module Ryespy
@@ -13,11 +11,8 @@ module Ryespy
       
       def initialize(url = nil, opts = {})
         @config = opts[:config] || Config.new
-        @logger = opts[:logger] || Logger.new(nil)
         
-        @redis_conn = RedisConn.new(url,
-          :logger => @logger
-        )
+        @redis = Redis.connect(:url => url)
         
         if block_given?
           yield self
@@ -27,13 +22,13 @@ module Ryespy
       end
       
       def close
-        @redis_conn.close
+        @redis.quit
       end
       
       def notify(job_class, args)
-        @redis_conn.redis.sadd("#{@config.redis_ns_notifiers}queues", RESQUE_QUEUE)
+        @redis.sadd("#{@config.redis_ns_notifiers}queues", RESQUE_QUEUE)
         
-        @redis_conn.redis.rpush("#{@config.redis_ns_notifiers}queue:#{RESQUE_QUEUE}", {
+        @redis.rpush("#{@config.redis_ns_notifiers}queue:#{RESQUE_QUEUE}", {
           # resque
           :class => job_class,
           :args  => args,

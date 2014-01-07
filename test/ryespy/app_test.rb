@@ -155,26 +155,6 @@ describe Ryespy::App do
     end
   end
   
-  describe "#redis" do
-    before do
-      @app = Ryespy::App.new
-      
-      @app.instance_variable_set(:@redis, nil)
-    end
-    
-    it "creates redis when empty" do
-      @app.redis.must_be_instance_of Redis
-    end
-    
-    it "returns redis when extant" do
-      @redis = stub
-      
-      @app.instance_variable_set(:@redis, @redis)
-      
-      @app.redis.must_equal @redis
-    end
-  end
-  
   describe "#notifiers" do
     before do
       @app = Ryespy::App.new

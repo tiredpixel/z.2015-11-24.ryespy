@@ -1,4 +1,5 @@
 require 'logger'
+require 'redis'
 
 
 module Ryespy
@@ -23,13 +24,9 @@ module Ryespy
       
       @logger.level = Logger.const_get(@config.log_level)
       
+      Redis.current = Redis.connect(:url => @config.redis_url)
+      
       @logger.debug { "Configured #{@config.to_s}" }
-    end
-    
-    def redis
-      @redis ||= RedisConn.new(@config.redis_url,
-        :logger => @logger
-      ).redis
     end
     
     def notifiers
@@ -84,7 +81,6 @@ module Ryespy
           'ftp'  => Listener::FTP,
         }[@config.listener.to_s].new(
           :config    => @config,
-          :redis     => redis,
           :notifiers => notifiers,
           :logger    => @logger
         ) do |listener|

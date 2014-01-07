@@ -1,4 +1,5 @@
 require 'logger'
+require 'redis'
 require 'net/imap'
 
 
@@ -8,9 +9,10 @@ module Ryespy
       
       def initialize(opts = {})
         @config    = opts[:config] || Config.new
-        @redis     = opts[:redis] || RedisConn.new
         @notifiers = opts[:notifiers] || []
         @logger    = opts[:logger] || Logger.new(nil)
+        
+        @redis = Redis.current
         
         begin
           @imap = Net::IMAP.new(@config.imap_host, {

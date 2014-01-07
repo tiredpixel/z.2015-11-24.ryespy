@@ -10,10 +10,6 @@ describe Ryespy::Notifier::Sidekiq do
     before do
       @sidekiq = Ryespy::Notifier::Sidekiq.new
     end
-    
-    it "creates redis connection" do
-      @sidekiq.instance_variable_get(:@redis_conn).must_be_instance_of Ryespy::RedisConn
-    end
   end
   
   describe "#close" do
@@ -22,7 +18,7 @@ describe Ryespy::Notifier::Sidekiq do
     end
     
     it "closes redis connection" do
-      @sidekiq.instance_variable_get(:@redis_conn).expects(:close)
+      @sidekiq.instance_variable_get(:@redis).expects(:quit)
       
       @sidekiq.close
     end
