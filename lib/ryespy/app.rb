@@ -76,15 +76,19 @@ module Ryespy
     
     def refresh_loop
       while @running do
-        {
-          'imap' => Listener::IMAP,
-          'ftp'  => Listener::FTP,
-        }[@config.listener.to_s].new(
-          :config    => @config,
-          :notifiers => notifiers,
-          :logger    => @logger
-        ) do |listener|
-          listener.check_all
+        begin
+          {
+            'imap' => Listener::IMAP,
+            'ftp'  => Listener::FTP,
+          }[@config.listener.to_s].new(
+            :config    => @config,
+            :notifiers => notifiers,
+            :logger    => @logger
+          ) do |listener|
+            listener.check_all
+          end
+        rescue StandardError => e
+          @logger.error { e.to_s }
         end
         
         if !@eternal

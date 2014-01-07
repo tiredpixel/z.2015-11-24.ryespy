@@ -14,17 +14,11 @@ module Ryespy
         
         @redis = Redis.current
         
-        begin
-          @ftp = Net::FTP.new(@config.ftp_host)
-          
-          @ftp.passive = @config.ftp_passive
-          
-          @ftp.login(@config.ftp_username, @config.ftp_password)
-        rescue Errno::ECONNREFUSED, Net::FTPError => e
-          @logger.error { e.to_s }
-          
-          return
-        end
+        @ftp = Net::FTP.new(@config.ftp_host)
+        
+        @ftp.passive = @config.ftp_passive
+        
+        @ftp.login(@config.ftp_username, @config.ftp_password)
         
         if block_given?
           yield self
@@ -38,30 +32,24 @@ module Ryespy
       end
       
       def check(params)
-        begin
-          @ftp.chdir(params[:dir])
+        @ftp.chdir(params[:dir])
+        
+        objects = {}
+        
+        @ftp.nlst.each do |fd|
+          mtime = @ftp.mtime(fd).to_i
+          size = @ftp.size(fd) rescue nil # ignore non-file error
           
-          objects = {}
-          
-          @ftp.nlst.each do |fd|
-            mtime = @ftp.mtime(fd).to_i
-            size = @ftp.size(fd) rescue nil # ignore non-file error
+          if size # exclude directories
+            checksum = "#{mtime},#{size}"
             
-            if size # exclude directories
-              checksum = "#{mtime},#{size}"
-              
-              if params[:seen_files][fd] != checksum
-                objects[fd] = checksum
-              end
+            if params[:seen_files][fd] != checksum
+              objects[fd] = checksum
             end
           end
-          
-          objects
-        rescue Net::FTPError => e
-          @logger.error { e.to_s }
-          
-          return
         end
+        
+        objects
       end
       
       def check_all
@@ -72,10 +60,14 @@ module Ryespy
           
           @logger.debug { "redis_key:#{redis_key}" }
           
-          new_items = check({
-            :dir        => dir,
-            :seen_files => @redis.hgetall(redis_key),
-          })
+          begin
+            new_items = check({
+              :dir        => dir,
+              :seen_files => @redis.hgetall(redis_key),
+            })
+          rescue Net::FTPError => e
+            @logger.error { e.to_s }
+          end
           
           @logger.debug { "new_items:#{new_items}" }
           

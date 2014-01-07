@@ -14,18 +14,12 @@ module Ryespy
         
         @redis = Redis.current
         
-        begin
-          @imap = Net::IMAP.new(@config.imap_host, {
-            :port => @config.imap_port,
-            :ssl  => @config.imap_ssl,
-          })
-          
-          @imap.login(@config.imap_username, @config.imap_password)
-        rescue Errno::ECONNREFUSED, Net::IMAP::Error => e
-          @logger.error { e.to_s }
-          
-          return
-        end
+        @imap = Net::IMAP.new(@config.imap_host, {
+          :port => @config.imap_port,
+          :ssl  => @config.imap_ssl,
+        })
+        
+        @imap.login(@config.imap_username, @config.imap_password)
         
         if block_given?
           yield self
@@ -39,17 +33,11 @@ module Ryespy
       end
       
       def check(params)
-        begin
-          @imap.select(params[:mailbox])
-          
-          uids = @imap.uid_search("#{params[:last_seen_uid] + 1}:*")
-          
-          uids.find_all { |uid| uid > params[:last_seen_uid] } # IMAP search gets fun with edge cases
-        rescue Net::IMAP::Error => e
-          @logger.error { e.to_s }
-          
-          return
-        end
+        @imap.select(params[:mailbox])
+        
+        uids = @imap.uid_search("#{params[:last_seen_uid] + 1}:*")
+        
+        uids.find_all { |uid| uid > params[:last_seen_uid] } # IMAP search gets fun with edge cases
       end
       
       def check_all
@@ -60,10 +48,14 @@ module Ryespy
           
           @logger.debug { "redis_key:#{redis_key}" }
           
-          new_items = check({
-            :mailbox       => mailbox,
-            :last_seen_uid => @redis.get(redis_key).to_i,
-          })
+          begin
+            new_items = check({
+              :mailbox       => mailbox,
+              :last_seen_uid => @redis.get(redis_key).to_i,
+            })
+          rescue Net::IMAP::Error => e
+            @logger.error { e.to_s }
+          end
           
           @logger.debug { "new_items:#{new_items}" }
           
