@@ -8,7 +8,7 @@ module Ryespy
   module Notifier
     class Sidekiq
       
-      RESQUE_QUEUE = 'ryespy'
+      SIDEKIQ_QUEUE = 'ryespy'.freeze
       
       def initialize(opts = {})
         @redis_config = {
@@ -30,14 +30,14 @@ module Ryespy
       end
       
       def notify(job_class, args)
-        @redis.sadd("queues", RESQUE_QUEUE)
+        @redis.sadd("queues", SIDEKIQ_QUEUE)
         
-        @redis.rpush("queue:#{RESQUE_QUEUE}", {
+        @redis.rpush("queue:#{SIDEKIQ_QUEUE}", {
           # resque
           :class => job_class,
           :args  => args,
           # sidekiq (extra)
-          :queue => RESQUE_QUEUE,
+          :queue => SIDEKIQ_QUEUE,
           :retry => true,
           :jid   => SecureRandom.hex(12),
         }.to_json)

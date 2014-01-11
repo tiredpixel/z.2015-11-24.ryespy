@@ -23,20 +23,20 @@ module Ryespy
     attr_accessor :ftp_dirs
     
     def initialize
-      @log_level          = 'INFO'
+      @log_level          = 'INFO'.freeze
       @polling_interval   = 60
-      @redis_ns_ryespy    = 'ryespy'
-      @redis_ns_notifiers = 'resque'
+      @redis_ns_ryespy    = 'ryespy'.freeze
+      @redis_ns_notifiers = 'resque'.freeze
       @notifiers          = {
         :sidekiq => [],
       }
       
       @imap_port      = 993
       @imap_ssl       = true
-      @imap_mailboxes = ['INBOX']
+      @imap_mailboxes = ['INBOX'.freeze]
       
       @ftp_passive    = false
-      @ftp_dirs       = ['/']
+      @ftp_dirs       = ['/'.freeze]
     end
     
     def to_s
@@ -50,8 +50,8 @@ module Ryespy
         :notifiers,
       ]
       
-      params.concat case @listener.to_s
-      when 'imap'
+      params.concat case @listener.to_sym
+      when :imap
         [
           :imap_host,
           :imap_port,
@@ -59,7 +59,7 @@ module Ryespy
           :imap_username,
           :imap_password,
         ]
-      when 'ftp'
+      when :ftp
         [
           :ftp_host,
           :ftp_passive,

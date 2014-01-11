@@ -7,6 +7,8 @@ module Ryespy
   module Listener
     class FTP
       
+      SIDEKIQ_JOB_CLASS = 'RyespyFTPJob'.freeze
+      
       def initialize(opts = {})
         @ftp_config = {
           :host     => opts[:host],
@@ -78,7 +80,7 @@ module Ryespy
           new_items.each do |filename, checksum|
             @redis.hset(redis_key, filename, checksum)
             
-            @notifiers.each { |n| n.notify('RyespyFTPJob', [dir, filename]) }
+            @notifiers.each { |n| n.notify(SIDEKIQ_JOB_CLASS, [dir, filename]) }
           end
           
           @logger.info { "#{dir} has #{new_items.count} new files" }

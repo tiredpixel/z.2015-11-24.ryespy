@@ -7,6 +7,8 @@ module Ryespy
   module Listener
     class IMAP
       
+      SIDEKIQ_JOB_CLASS = 'RyespyIMAPJob'.freeze
+      
       def initialize(opts = {})
         @imap_config = {
           :host      => opts[:host],
@@ -66,7 +68,7 @@ module Ryespy
           new_items.each do |uid|
             @redis.set(redis_key, uid)
             
-            @notifiers.each { |n| n.notify('RyespyIMAPJob', [mailbox, uid]) }
+            @notifiers.each { |n| n.notify(SIDEKIQ_JOB_CLASS, [mailbox, uid]) }
           end
           
           @logger.info { "#{mailbox} has #{new_items.count} new emails" }

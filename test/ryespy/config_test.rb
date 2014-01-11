@@ -56,16 +56,6 @@ describe Ryespy::Config do
       @config = Ryespy::Config.new
     end
     
-    describe "when listener NULL" do
-      before do
-        @config.listener = nil
-      end
-      
-      it "stringifies hash of config" do
-        @config.to_s.must_equal '{:log_level=>"INFO", :listener=>nil, :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy", :redis_ns_notifiers=>"resque", :notifiers=>{:sidekiq=>[]}}'
-      end
-    end
-    
     describe "when listener IMAP" do
       before do
         @config.listener = 'imap'
