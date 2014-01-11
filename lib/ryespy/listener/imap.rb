@@ -8,18 +8,24 @@ module Ryespy
     class IMAP
       
       def initialize(opts = {})
-        @config    = opts[:config] || Config.new
+        @imap_config = {
+          :host      => opts[:host],
+          :port      => opts[:port],
+          :ssl       => opts[:ssl],
+          :username  => opts[:username],
+          :password  => opts[:password],
+        }
+        
+        @imap_mailboxes = opts[:mailboxes]
+        
+        @redis_ns_ryespy = opts[:redis_ns_ryespy]
+        
         @notifiers = opts[:notifiers] || []
         @logger    = opts[:logger] || Logger.new(nil)
         
         @redis = Redis.current
         
-        @imap = Net::IMAP.new(@config.imap_host, {
-          :port => @config.imap_port,
-          :ssl  => @config.imap_ssl,
-        })
-        
-        @imap.login(@config.imap_username, @config.imap_password)
+        connect_imap
         
         if block_given?
           yield self
@@ -41,10 +47,10 @@ module Ryespy
       end
       
       def check_all
-        @config.imap_mailboxes.each do |mailbox|
+        @imap_mailboxes.each do |mailbox|
           @logger.debug { "mailbox:#{mailbox}" }
           
-          redis_key = "#{@config.redis_prefix_ryespy}#{@config.imap_host},#{@config.imap_port}:#{@config.imap_username}:#{mailbox}"
+          redis_key = "#{@redis_ns_ryespy}#{@imap_config[:host]},#{@imap_config[:port]}:#{@imap_config[:username]}:#{mailbox}"
           
           @logger.debug { "redis_key:#{redis_key}" }
           
@@ -67,6 +73,17 @@ module Ryespy
           
           @logger.info { "#{mailbox} has #{new_items.count} new emails" }
         end
+      end
+      
+      private
+      
+      def connect_imap
+        @imap = Net::IMAP.new(@imap_config[:host], {
+          :port => @imap_config[:port],
+          :ssl  => @imap_config[:ssl],
+        })
+        
+        @imap.login(@imap_config[:username], @imap_config[:password])
       end
       
     end

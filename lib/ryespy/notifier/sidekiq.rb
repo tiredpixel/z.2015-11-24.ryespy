@@ -9,10 +9,14 @@ module Ryespy
       
       RESQUE_QUEUE = 'ryespy'
       
-      def initialize(url = nil, opts = {})
-        @config = opts[:config] || Config.new
+      def initialize(opts = {})
+        @redis_config = {
+          :url => opts[:url],
+        }
         
-        @redis = Redis.connect(:url => url)
+        @redis_ns_notifiers = opts[:redis_ns_notifiers]
+        
+        connect_redis
         
         if block_given?
           yield self
@@ -26,9 +30,9 @@ module Ryespy
       end
       
       def notify(job_class, args)
-        @redis.sadd("#{@config.redis_ns_notifiers}queues", RESQUE_QUEUE)
+        @redis.sadd("#{@redis_ns_notifiers}queues", RESQUE_QUEUE)
         
-        @redis.rpush("#{@config.redis_ns_notifiers}queue:#{RESQUE_QUEUE}", {
+        @redis.rpush("#{@redis_ns_notifiers}queue:#{RESQUE_QUEUE}", {
           # resque
           :class => job_class,
           :args  => args,
@@ -37,6 +41,12 @@ module Ryespy
           :retry => true,
           :jid   => SecureRandom.hex(12),
         }.to_json)
+      end
+      
+      private
+      
+      def connect_redis
+        @redis = Redis.connect(:url => @redis_config[:url])
       end
       
     end

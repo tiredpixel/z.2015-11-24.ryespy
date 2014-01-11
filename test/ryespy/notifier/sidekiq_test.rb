@@ -36,7 +36,9 @@ describe Ryespy::Notifier::Sidekiq do
       
       @config.instance_variable_set(:@redis_ns_notifiers, 'ryespy-test:da:')
       
-      @sidekiq = Ryespy::Notifier::Sidekiq.new(nil, :config => @config)
+      @sidekiq = Ryespy::Notifier::Sidekiq.new(
+        :redis_ns_notifiers => @config.redis_ns_notifiers
+      )
     end
     
     it "writes to redis set" do

@@ -8,17 +8,23 @@ module Ryespy
     class FTP
       
       def initialize(opts = {})
-        @config    = opts[:config] || Config.new
+        @ftp_config = {
+          :host     => opts[:host],
+          :passive  => opts[:passive],
+          :username => opts[:username],
+          :password => opts[:password],
+        }
+        
+        @ftp_dirs = opts[:dirs]
+        
+        @redis_ns_ryespy = opts[:redis_ns_ryespy]
+        
         @notifiers = opts[:notifiers] || []
         @logger    = opts[:logger] || Logger.new(nil)
         
         @redis = Redis.current
         
-        @ftp = Net::FTP.new(@config.ftp_host)
-        
-        @ftp.passive = @config.ftp_passive
-        
-        @ftp.login(@config.ftp_username, @config.ftp_password)
+        connect_ftp
         
         if block_given?
           yield self
@@ -53,10 +59,10 @@ module Ryespy
       end
       
       def check_all
-        @config.ftp_dirs.each do |dir|
+        @ftp_dirs.each do |dir|
           @logger.debug { "dir:#{dir}" }
           
-          redis_key = "#{@config.redis_prefix_ryespy}#{@config.ftp_host}:#{@config.ftp_username}:#{dir}"
+          redis_key = "#{@redis_ns_ryespy}#{@ftp_config[:host]}:#{@ftp_config[:username]}:#{dir}"
           
           @logger.debug { "redis_key:#{redis_key}" }
           
@@ -79,6 +85,16 @@ module Ryespy
           
           @logger.info { "#{dir} has #{new_items.count} new files" }
         end
+      end
+      
+      private
+      
+      def connect_ftp
+        @ftp = Net::FTP.new(@ftp_config[:host])
+        
+        @ftp.passive = @ftp_config[:passive]
+        
+        @ftp.login(@ftp_config[:username], @ftp_config[:password])
       end
       
     end
