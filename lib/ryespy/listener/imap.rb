@@ -18,8 +18,6 @@ module Ryespy
           :password  => opts[:password],
         }
         
-        @imap_mailboxes = opts[:mailboxes]
-        
         @notifiers = opts[:notifiers] || []
         @logger    = opts[:logger] || Logger.new(nil)
         
@@ -38,41 +36,24 @@ module Ryespy
         @imap.disconnect
       end
       
-      def check(params)
-        @imap.select(params[:mailbox])
+      def check(mailbox)
+        @logger.debug { "mailbox:#{mailbox}" }
         
-        uids = @imap.uid_search("#{params[:last_seen_uid] + 1}:*")
+        @logger.debug { "redis_key:#{redis_key(mailbox)}" }
         
-        uids.find_all { |uid| uid > params[:last_seen_uid] } # IMAP search gets fun with edge cases
-      end
-      
-      def check_all
-        @imap_mailboxes.each do |mailbox|
-          @logger.debug { "mailbox:#{mailbox}" }
+        last_seen_uid = @redis.get(redis_key(mailbox)).to_i
+        
+        unseen_uids = get_unseen_uids(mailbox, last_seen_uid)
+        
+        @logger.debug { "unseen_uids:#{unseen_uids}" }
+        
+        unseen_uids.each do |uid|
+          @redis.set(redis_key(mailbox), uid)
           
-          redis_key = "#{@imap_config[:host]},#{@imap_config[:port]}:#{@imap_config[:username]}:#{mailbox}"
-          
-          @logger.debug { "redis_key:#{redis_key}" }
-          
-          begin
-            new_items = check({
-              :mailbox       => mailbox,
-              :last_seen_uid => @redis.get(redis_key).to_i,
-            })
-          rescue Net::IMAP::Error => e
-            @logger.error { e.to_s }
-          end
-          
-          @logger.debug { "new_items:#{new_items}" }
-          
-          new_items.each do |uid|
-            @redis.set(redis_key, uid)
-            
-            @notifiers.each { |n| n.notify(SIDEKIQ_JOB_CLASS, [mailbox, uid]) }
-          end
-          
-          @logger.info { "#{mailbox} has #{new_items.count} new emails" }
+          @notifiers.each { |n| n.notify(SIDEKIQ_JOB_CLASS, [mailbox, uid]) }
         end
+        
+        @logger.info { "#{mailbox} has #{unseen_uids.count} new emails" }
       end
       
       private
@@ -84,6 +65,19 @@ module Ryespy
         })
         
         @imap.login(@imap_config[:username], @imap_config[:password])
+      end
+      
+      def redis_key(mailbox)
+        "#{@imap_config[:host]},#{@imap_config[:port]}:#{@imap_config[:username]}:#{mailbox}"
+      end
+      
+      def get_unseen_uids(mailbox, last_seen_uid = nil)
+        @imap.select(mailbox)
+        
+        uids = @imap.uid_search("#{last_seen_uid + 1}:*")
+        
+        # filter as IMAP search gets fun with edge cases
+        uids.find_all { |uid| uid > last_seen_uid }
       end
       
     end

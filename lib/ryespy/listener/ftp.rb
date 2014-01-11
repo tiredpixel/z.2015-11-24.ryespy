@@ -17,8 +17,6 @@ module Ryespy
           :password => opts[:password],
         }
         
-        @ftp_dirs = opts[:dirs]
-        
         @notifiers = opts[:notifiers] || []
         @logger    = opts[:logger] || Logger.new(nil)
         
@@ -37,54 +35,24 @@ module Ryespy
         @ftp.close
       end
       
-      def check(params)
-        @ftp.chdir(params[:dir])
+      def check(dir)
+        @logger.debug { "dir:#{dir}" }
         
-        objects = {}
+        @logger.debug { "redis_key:#{redis_key(dir)}" }
         
-        @ftp.nlst.each do |fd|
-          mtime = @ftp.mtime(fd).to_i
-          size = @ftp.size(fd) rescue nil # ignore non-file error
+        seen_files = @redis.hgetall(redis_key(dir))
+        
+        unseen_files = get_unseen_files(dir, seen_files)
+        
+        @logger.debug { "unseen_files:#{unseen_files}" }
+        
+        unseen_files.each do |filename, checksum|
+          @redis.hset(redis_key(dir), filename, checksum)
           
-          if size # exclude directories
-            checksum = "#{mtime},#{size}"
-            
-            if params[:seen_files][fd] != checksum
-              objects[fd] = checksum
-            end
-          end
+          @notifiers.each { |n| n.notify(SIDEKIQ_JOB_CLASS, [dir, filename]) }
         end
         
-        objects
-      end
-      
-      def check_all
-        @ftp_dirs.each do |dir|
-          @logger.debug { "dir:#{dir}" }
-          
-          redis_key = "#{@ftp_config[:host]}:#{@ftp_config[:username]}:#{dir}"
-          
-          @logger.debug { "redis_key:#{redis_key}" }
-          
-          begin
-            new_items = check({
-              :dir        => dir,
-              :seen_files => @redis.hgetall(redis_key),
-            })
-          rescue Net::FTPError => e
-            @logger.error { e.to_s }
-          end
-          
-          @logger.debug { "new_items:#{new_items}" }
-          
-          new_items.each do |filename, checksum|
-            @redis.hset(redis_key, filename, checksum)
-            
-            @notifiers.each { |n| n.notify(SIDEKIQ_JOB_CLASS, [dir, filename]) }
-          end
-          
-          @logger.info { "#{dir} has #{new_items.count} new files" }
-        end
+        @logger.info { "#{dir} has #{unseen_files.count} new files" }
       end
       
       private
@@ -95,6 +63,31 @@ module Ryespy
         @ftp.passive = @ftp_config[:passive]
         
         @ftp.login(@ftp_config[:username], @ftp_config[:password])
+      end
+      
+      def redis_key(dir)
+        "#{@ftp_config[:host]}:#{@ftp_config[:username]}:#{dir}"
+      end
+      
+      def get_unseen_files(dir, seen_files)
+        @ftp.chdir(dir)
+        
+        files = {}
+        
+        @ftp.nlst.each do |file|
+          mtime = @ftp.mtime(file).to_i
+          size = @ftp.size(file) rescue nil # ignore non-file error
+          
+          if size # exclude directories
+            checksum = "#{mtime},#{size}".freeze
+            
+            if seen_files[file] != checksum
+              files[file] = checksum
+            end
+          end
+        end
+        
+        files
       end
       
     end

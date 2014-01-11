@@ -110,11 +110,10 @@ module Ryespy
         :ssl       => @config.imap_ssl,
         :username  => @config.imap_username,
         :password  => @config.imap_password,
-        :mailboxes => @config.imap_mailboxes,
         :notifiers => notifiers,
         :logger    => @logger,
       ) do |listener|
-        listener.check_all
+        @config.imap_mailboxes.each { |m| listener.check(m) }
       end
     end
     
@@ -124,11 +123,10 @@ module Ryespy
         :passive   => @config.ftp_passive,
         :username  => @config.ftp_username,
         :password  => @config.ftp_password,
-        :dirs      => @config.ftp_dirs,
         :notifiers => notifiers,
         :logger    => @logger,
       ) do |listener|
-        listener.check_all
+        @config.ftp_dirs.each { |d| listener.check(d) }
       end
     end
     
