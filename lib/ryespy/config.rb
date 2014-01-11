@@ -25,8 +25,8 @@ module Ryespy
     def initialize
       @log_level          = 'INFO'
       @polling_interval   = 60
-      @redis_ns_ryespy    = 'ryespy:'
-      @redis_ns_notifiers = 'resque:'
+      @redis_ns_ryespy    = 'ryespy'
+      @redis_ns_notifiers = 'resque'
       @notifiers          = {
         :sidekiq => [],
       }

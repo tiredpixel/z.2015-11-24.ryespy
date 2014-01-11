@@ -1,4 +1,5 @@
 require 'redis'
+require 'redis-namespace'
 require 'json'
 require 'securerandom'
 
@@ -11,10 +12,9 @@ module Ryespy
       
       def initialize(opts = {})
         @redis_config = {
-          :url => opts[:url],
+          :url       => opts[:url],
+          :namespace => opts[:namespace],
         }
-        
-        @redis_ns_notifiers = opts[:redis_ns_notifiers]
         
         connect_redis
         
@@ -30,9 +30,9 @@ module Ryespy
       end
       
       def notify(job_class, args)
-        @redis.sadd("#{@redis_ns_notifiers}queues", RESQUE_QUEUE)
+        @redis.sadd("queues", RESQUE_QUEUE)
         
-        @redis.rpush("#{@redis_ns_notifiers}queue:#{RESQUE_QUEUE}", {
+        @redis.rpush("queue:#{RESQUE_QUEUE}", {
           # resque
           :class => job_class,
           :args  => args,
@@ -46,7 +46,9 @@ module Ryespy
       private
       
       def connect_redis
-        @redis = Redis.connect(:url => @redis_config[:url])
+        @redis = Redis::Namespace.new(@redis_config[:namespace],
+          :redis => Redis.connect(:url => @redis_config[:url])
+        )
       end
       
     end

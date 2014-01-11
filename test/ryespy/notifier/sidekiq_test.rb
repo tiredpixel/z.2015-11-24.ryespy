@@ -34,10 +34,10 @@ describe Ryespy::Notifier::Sidekiq do
       
       @config = Ryespy::Config.new
       
-      @config.instance_variable_set(:@redis_ns_notifiers, 'ryespy-test:da:')
+      @config.instance_variable_set(:@redis_ns_notifiers, 'ryespy-test:da')
       
       @sidekiq = Ryespy::Notifier::Sidekiq.new(
-        :redis_ns_notifiers => @config.redis_ns_notifiers
+        :namespace => @config.redis_ns_notifiers
       )
     end
     

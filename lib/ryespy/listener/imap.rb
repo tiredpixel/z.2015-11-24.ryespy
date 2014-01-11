@@ -18,8 +18,6 @@ module Ryespy
         
         @imap_mailboxes = opts[:mailboxes]
         
-        @redis_ns_ryespy = opts[:redis_ns_ryespy]
-        
         @notifiers = opts[:notifiers] || []
         @logger    = opts[:logger] || Logger.new(nil)
         
@@ -50,7 +48,7 @@ module Ryespy
         @imap_mailboxes.each do |mailbox|
           @logger.debug { "mailbox:#{mailbox}" }
           
-          redis_key = "#{@redis_ns_ryespy}#{@imap_config[:host]},#{@imap_config[:port]}:#{@imap_config[:username]}:#{mailbox}"
+          redis_key = "#{@imap_config[:host]},#{@imap_config[:port]}:#{@imap_config[:username]}:#{mailbox}"
           
           @logger.debug { "redis_key:#{redis_key}" }
           

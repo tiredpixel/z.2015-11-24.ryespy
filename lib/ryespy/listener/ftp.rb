@@ -17,8 +17,6 @@ module Ryespy
         
         @ftp_dirs = opts[:dirs]
         
-        @redis_ns_ryespy = opts[:redis_ns_ryespy]
-        
         @notifiers = opts[:notifiers] || []
         @logger    = opts[:logger] || Logger.new(nil)
         
@@ -62,7 +60,7 @@ module Ryespy
         @ftp_dirs.each do |dir|
           @logger.debug { "dir:#{dir}" }
           
-          redis_key = "#{@redis_ns_ryespy}#{@ftp_config[:host]}:#{@ftp_config[:username]}:#{dir}"
+          redis_key = "#{@ftp_config[:host]}:#{@ftp_config[:username]}:#{dir}"
           
           @logger.debug { "redis_key:#{redis_key}" }
           

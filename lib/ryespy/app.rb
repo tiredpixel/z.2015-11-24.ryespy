@@ -1,5 +1,6 @@
 require 'logger'
 require 'redis'
+require 'redis-namespace'
 
 
 module Ryespy
@@ -24,7 +25,9 @@ module Ryespy
       
       @logger.level = Logger.const_get(@config.log_level)
       
-      Redis.current = Redis.connect(:url => @config.redis_url)
+      Redis.current = Redis::Namespace.new(@config.redis_ns_ryespy,
+        :redis => Redis.connect(:url => @config.redis_url)
+      )
       
       @logger.debug { "Configured #{@config.to_s}" }
     end
@@ -35,9 +38,9 @@ module Ryespy
         
         @config.notifiers[:sidekiq].each do |notifier_url|
           @notifiers << Notifier::Sidekiq.new(
-            :url                => notifier_url,
-            :redis_ns_notifiers => @config.redis_ns_notifiers,
-            :logger             => @logger
+            :url       => notifier_url,
+            :namespace => @config.redis_ns_notifiers,
+            :logger    => @logger
           )
         end
       end
@@ -102,15 +105,14 @@ module Ryespy
     
     def check_all_imap
       Listener::IMAP.new(
-        :host            => @config.imap_host,
-        :port            => @config.imap_port,
-        :ssl             => @config.imap_ssl,
-        :username        => @config.imap_username,
-        :password        => @config.imap_password,
-        :mailboxes       => @config.imap_mailboxes,
-        :redis_ns_ryespy => @config.redis_ns_ryespy,
-        :notifiers       => notifiers,
-        :logger          => @logger,
+        :host      => @config.imap_host,
+        :port      => @config.imap_port,
+        :ssl       => @config.imap_ssl,
+        :username  => @config.imap_username,
+        :password  => @config.imap_password,
+        :mailboxes => @config.imap_mailboxes,
+        :notifiers => notifiers,
+        :logger    => @logger,
       ) do |listener|
         listener.check_all
       end
@@ -118,14 +120,13 @@ module Ryespy
     
     def check_all_ftp
       Listener::FTP.new(
-        :host            => @config.ftp_host,
-        :passive         => @config.ftp_passive,
-        :username        => @config.ftp_username,
-        :password        => @config.ftp_password,
-        :dirs            => @config.ftp_dirs,
-        :redis_ns_ryespy => @config.redis_ns_ryespy,
-        :notifiers       => notifiers,
-        :logger          => @logger,
+        :host      => @config.ftp_host,
+        :passive   => @config.ftp_passive,
+        :username  => @config.ftp_username,
+        :password  => @config.ftp_password,
+        :dirs      => @config.ftp_dirs,
+        :notifiers => notifiers,
+        :logger    => @logger,
       ) do |listener|
         listener.check_all
       end

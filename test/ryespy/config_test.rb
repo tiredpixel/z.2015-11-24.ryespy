@@ -19,11 +19,11 @@ describe Ryespy::Config do
     end
     
     it "defaults redis_ns_ryespy to ryespy:" do
-      @config.redis_ns_ryespy.must_equal 'ryespy:'
+      @config.redis_ns_ryespy.must_equal 'ryespy'
     end
     
     it "defaults redis_ns_notifiers to resque:" do
-      @config.redis_ns_notifiers.must_equal 'resque:'
+      @config.redis_ns_notifiers.must_equal 'resque'
     end
     
     it "defaults notifiers hash structure" do
@@ -62,7 +62,7 @@ describe Ryespy::Config do
       end
       
       it "stringifies hash of config" do
-        @config.to_s.must_equal '{:log_level=>"INFO", :listener=>nil, :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy:", :redis_ns_notifiers=>"resque:", :notifiers=>{:sidekiq=>[]}}'
+        @config.to_s.must_equal '{:log_level=>"INFO", :listener=>nil, :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy", :redis_ns_notifiers=>"resque", :notifiers=>{:sidekiq=>[]}}'
       end
     end
     
@@ -72,7 +72,7 @@ describe Ryespy::Config do
       end
       
       it "stringifies hash of config" do
-        @config.to_s.must_equal '{:log_level=>"INFO", :listener=>"imap", :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy:", :redis_ns_notifiers=>"resque:", :notifiers=>{:sidekiq=>[]}, :imap_host=>nil, :imap_port=>993, :imap_ssl=>true, :imap_username=>nil, :imap_password=>nil}'
+        @config.to_s.must_equal '{:log_level=>"INFO", :listener=>"imap", :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy", :redis_ns_notifiers=>"resque", :notifiers=>{:sidekiq=>[]}, :imap_host=>nil, :imap_port=>993, :imap_ssl=>true, :imap_username=>nil, :imap_password=>nil}'
       end
     end
     
@@ -82,7 +82,7 @@ describe Ryespy::Config do
       end
       
       it "stringifies hash of config" do
-        @config.to_s.must_equal '{:log_level=>"INFO", :listener=>"ftp", :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy:", :redis_ns_notifiers=>"resque:", :notifiers=>{:sidekiq=>[]}, :ftp_host=>nil, :ftp_passive=>false, :ftp_username=>nil, :ftp_dirs=>["/"]}'
+        @config.to_s.must_equal '{:log_level=>"INFO", :listener=>"ftp", :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy", :redis_ns_notifiers=>"resque", :notifiers=>{:sidekiq=>[]}, :ftp_host=>nil, :ftp_passive=>false, :ftp_username=>nil, :ftp_dirs=>["/"]}'
       end
     end
   end
