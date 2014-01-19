@@ -1,68 +1,43 @@
 require_relative '../../helper'
 
-require_relative '../../../lib/ryespy/config'
 require_relative '../../../lib/ryespy/notifier/sidekiq'
 
 
 describe Ryespy::Notifier::Sidekiq do
   
-  describe "#initialize" do
-    before do
-      @sidekiq = Ryespy::Notifier::Sidekiq.new
-    end
-  end
-  
-  describe "#close" do
-    before do
-      @sidekiq = Ryespy::Notifier::Sidekiq.new
-    end
-    
-    it "closes redis connection" do
-      @sidekiq.instance_variable_get(:@redis).expects(:quit)
-      
-      @sidekiq.close
-    end
-  end
-  
   describe "#notify" do
     before do
-      @redis = stub(
-        :ping => nil
-      )
-      
-      Redis.stubs(:connect).returns(@redis)
-      
-      @config = Ryespy::Config.new
-      
-      @config.instance_variable_set(:@redis_ns_notifiers, 'ryespy-test:da')
-      
       @sidekiq = Ryespy::Notifier::Sidekiq.new(
-        :namespace => @config.redis_ns_notifiers
+        :namespace => Ryespy::Test::Redis::namespace
       )
+      
+      @redis = @sidekiq.instance_variable_get(:@redis)
     end
     
-    it "writes to redis set" do
-      @redis.stubs(:rpush)
+    after do
+      @sidekiq.close
       
-      @redis.expects(:sadd).with('ryespy-test:da:queues', 'ryespy')
-      
-      @sidekiq.notify('', {})
+      Ryespy::Test::Redis::flush_namespace(@redis)
     end
     
-    it "writes to redis list" do
-      @redis.stubs(:sadd)
+    it "writes to queues set" do
+      @sidekiq.notify(nil, nil)
       
-      SecureRandom.stubs(:hex).returns('JID')
-      
-      @redis.expects(:rpush).with('ryespy-test:da:queue:ryespy', {
-        :class => 'PlanetClass',
-        :args  => { :brain => 'marvin' },
-        :queue => 'ryespy',
-        :retry => true,
-        :jid   => 'JID',
-      }.to_json)
+      @redis.smembers('queues').must_equal ['ryespy']
+    end
+    
+    it "writes to queue list" do
+      SecureRandom.stubs(:hex).returns('9c964160d25fdf24c6549e6d')
       
       @sidekiq.notify('PlanetClass', { :brain => 'marvin' })
+      
+      @redis.lrange('queue:ryespy', 0, -1).must_equal([{
+        'class' => 'PlanetClass',
+        'args'  => { 'brain' => 'marvin' },
+        'queue' => 'ryespy',
+        'retry' => true,
+        'jid'   => '9c964160d25fdf24c6549e6d',
+      }.to_json])
     end
   end
   
