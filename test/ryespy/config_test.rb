@@ -18,11 +18,11 @@ describe Ryespy::Config do
       @config.polling_interval.must_equal 60
     end
     
-    it "defaults redis_ns_ryespy to ryespy:" do
+    it "defaults redis_ns_ryespy to ryespy" do
       @config.redis_ns_ryespy.must_equal 'ryespy'
     end
     
-    it "defaults redis_ns_notifiers to resque:" do
+    it "defaults redis_ns_notifiers to resque" do
       @config.redis_ns_notifiers.must_equal 'resque'
     end
     
@@ -74,19 +74,6 @@ describe Ryespy::Config do
       it "stringifies hash of config" do
         @config.to_s.must_equal '{:log_level=>"INFO", :listener=>"ftp", :polling_interval=>60, :redis_url=>nil, :redis_ns_ryespy=>"ryespy", :redis_ns_notifiers=>"resque", :notifiers=>{:sidekiq=>[]}, :ftp_host=>nil, :ftp_passive=>false, :ftp_username=>nil, :ftp_dirs=>["/"]}'
       end
-    end
-  end
-  
-  describe "#redis_prefix_ryespy" do
-    before do
-      @config = Ryespy::Config.new
-      
-      @config.listener        = 'earear'
-      @config.redis_ns_ryespy = 'LittleEye:'
-    end
-    
-    it "returns key prefix" do
-      @config.redis_prefix_ryespy.must_equal "LittleEye:earear:"
     end
   end
   
