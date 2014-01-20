@@ -1,10 +1,29 @@
 require 'logger'
+require 'ostruct'
 require 'redis'
 require 'redis-namespace'
 
 
 module Ryespy
   class App
+    
+    def self.config_defaults
+      {
+        :log_level          => :INFO,
+        :polling_interval   => 60,
+        :redis_ns_ryespy    => 'ryespy',
+        :redis_ns_notifiers => 'resque',
+        :imap => {
+          :port      => 993,
+          :ssl       => true,
+          :mailboxes => ['INBOX'],
+        },
+        :ftp => {
+          :passive => false,
+          :dirs    => ['/'],
+        },
+      }
+    end
     
     attr_reader :config
     attr_reader :running
@@ -14,7 +33,7 @@ module Ryespy
       
       @logger = opts[:logger] || Logger.new(nil)
       
-      @config = Config.new
+      @config = OpenStruct.new(self.class.config_defaults)
       
       @running = false
       @threads = {}
@@ -81,7 +100,7 @@ module Ryespy
     def refresh_loop
       while @running do
         begin
-          case @config.listener.to_sym
+          case @config.listener
           when :imap
             check_all_imap
           when :ftp
@@ -105,28 +124,28 @@ module Ryespy
     
     def check_all_imap
       Listener::IMAP.new(
-        :host      => @config.imap_host,
-        :port      => @config.imap_port,
-        :ssl       => @config.imap_ssl,
-        :username  => @config.imap_username,
-        :password  => @config.imap_password,
+        :host      => @config.imap[:host],
+        :port      => @config.imap[:port],
+        :ssl       => @config.imap[:ssl],
+        :username  => @config.imap[:username],
+        :password  => @config.imap[:password],
         :notifiers => notifiers,
         :logger    => @logger,
       ) do |listener|
-        @config.imap_mailboxes.each { |m| listener.check(m) }
+        @config.imap[:mailboxes].each { |m| listener.check(m) }
       end
     end
     
     def check_all_ftp
       Listener::FTP.new(
-        :host      => @config.ftp_host,
-        :passive   => @config.ftp_passive,
-        :username  => @config.ftp_username,
-        :password  => @config.ftp_password,
+        :host      => @config.ftp[:host],
+        :passive   => @config.ftp[:passive],
+        :username  => @config.ftp[:username],
+        :password  => @config.ftp[:password],
         :notifiers => notifiers,
         :logger    => @logger,
       ) do |listener|
-        @config.ftp_dirs.each { |d| listener.check(d) }
+        @config.ftp[:dirs].each { |d| listener.check(d) }
       end
     end
     

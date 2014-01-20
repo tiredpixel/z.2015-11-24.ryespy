@@ -1,5 +1,4 @@
 require_relative 'ryespy/version'
-require_relative 'ryespy/config'
 
 require_relative 'ryespy/app'
 
