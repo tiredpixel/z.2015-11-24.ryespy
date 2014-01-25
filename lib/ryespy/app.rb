@@ -24,6 +24,11 @@ module Ryespy
           :passive => false,
           :dirs    => ['/'],
         },
+        :rax_cf => {
+          :endpoint => :us,
+          :region   => :dfw,
+          :prefixes => [''],
+        },
       }
     end
     
@@ -144,6 +149,20 @@ module Ryespy
         :logger    => @logger,
       ) do |listener|
         @config.ftp[:dirs].each { |d| listener.check(d) }
+      end
+    end
+    
+    def check_all_rax_cf
+      Listener::RaxCF.new(
+        :endpoint  => @config.rax_cf[:endpoint],
+        :region    => @config.rax_cf[:region],
+        :username  => @config.rax_cf[:username],
+        :api_key   => @config.rax_cf[:api_key],
+        :container => @config.rax_cf[:container],
+        :notifiers => notifiers,
+        :logger    => @logger,
+      ) do |listener|
+        @config.rax_cf[:prefixes].each { |p| listener.check(p) }
       end
     end
     

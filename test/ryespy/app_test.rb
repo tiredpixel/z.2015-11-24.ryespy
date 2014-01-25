@@ -153,6 +153,43 @@ describe Ryespy::App do
         @config.ftp_dirs.must_equal ['BoxA', 'Sent Messages']
       end
     end
+    
+    describe "listener rax-cf" do
+      before do
+        @app.configure do |c|
+          c.rax_cf_endpoint  = 'uk'
+          c.rax_cf_region    = 'lon'
+          c.rax_cf_username  = 'van.helsing'
+          c.rax_cf_api_key   = 'M.D., D.Ph., D.Litt., etc.'
+          c.rax_cf_container = 'the-milk-that-is-spilt-cries-not-out-afterwards'
+          c.rax_cf_prefixes  = ['host/', 'cross/']
+        end
+      end
+      
+      it "configures rax_cf_endpoint" do
+        @config.rax_cf_endpoint.must_equal 'uk'
+      end
+      
+      it "configures rax_cf_region" do
+        @config.rax_cf_region.must_equal 'lon'
+      end
+      
+      it "configures rax_cf_username" do
+        @config.rax_cf_username.must_equal 'van.helsing'
+      end
+      
+      it "configures rax_cf_api_key" do
+        @config.rax_cf_api_key.must_equal 'M.D., D.Ph., D.Litt., etc.'
+      end
+      
+      it "configures rax_cf_container" do
+        @config.rax_cf_container.must_equal 'the-milk-that-is-spilt-cries-not-out-afterwards'
+      end
+      
+      it "configures rax_cf_prefixes" do
+        @config.rax_cf_prefixes.must_equal ["host/", "cross/"]
+      end
+    end
   end
   
   describe "#notifiers" do

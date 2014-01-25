@@ -26,8 +26,12 @@ OptionParser.new do |opts|
   opts.separator ""
   opts.separator "Listener:"
   
-  opts.on("-l", "--listener LISTENER", [:imap, :ftp], "Listener (imap|ftp)") do |o|
-    options[:listener] = o
+  opts.on("-l", "--listener LISTENER", [
+    'imap',
+    'ftp',
+    'rax-cf',
+  ], "Listener (imap|ftp|rax-cf)") do |o|
+    options[:listener] = o.tr('-', '_').to_sym
   end
   
   opts.separator ""
@@ -107,6 +111,33 @@ OptionParser.new do |opts|
   end
   
   opts.separator ""
+  opts.separator "Listener  rax-cf  (Rackspace Cloud Files):"
+  
+  opts.on("--rax-cf-endpoint [ENDPOINT]", "Auth ENDPOINT (default: us)") do |o|
+    options[:rax_cf_endpoint] = o
+  end
+  
+  opts.on("--rax-cf-region [REGION]", "Auth REGION (default: dfw)") do |o|
+    options[:rax_cf_region] = o
+  end
+  
+  opts.on("--rax-cf-username USERNAME", "Auth USERNAME") do |o|
+    options[:rax_cf_username] = o
+  end
+  
+  opts.on("--rax-cf-api-key API_KEY", "Auth API_KEY") do |o|
+    options[:rax_cf_api_key] = o
+  end
+  
+  opts.on("--rax-cf-container CONTAINER", "Storage CONTAINER") do |o|
+    options[:rax_cf_container] = o
+  end
+  
+  opts.on("--rax-cf-prefixes [P1,P2]", Array, "Prefixes P1,P2 (default: *)") do |o|
+    options[:rax_cf_prefixes] = o
+  end
+  
+  opts.separator ""
   opts.separator "Notifier sidekiq:"
   
   opts.on("--notifier-sidekiq [URL]", "Notify Sidekiq/Resque at Redis URL") do |o|
@@ -181,6 +212,14 @@ end
       :username,
       :password,
       :dirs,
+    ],
+    :rax_cf => [
+      :endpoint,
+      :region,
+      :username,
+      :api_key,
+      :container,
+      :prefixes,
     ],
   }[c.listener].each do |k|
     lk = "#{c.listener}_#{k}".to_sym
