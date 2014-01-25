@@ -44,25 +44,31 @@ View the available options:
 
     $ ryespy --help
 
-It is necessary to specify a listener (imap|ftp|rax-cf) and a notifier (sidekiq).
+It is necessary to specify a listener and at least one notifier. Currently, the only notifier is `--notifier-sidekiq` (this must be specified).
 
-Check IMAP, queue new email UIDs, and quit (maybe for Cron):
+- `--listener imap` :
+  
+  Check IMAP, queue new email UIDs, and quit (maybe for Cron):
+  
+        $ ryespy --listener imap --imap-host mail.example.com --imap-username a@example.com --imap-password helpimacarrot --notifier-sidekiq
+  
+  For non-SSL, use `--no-imap-ssl`. For non-INBOX or multiple mailboxes, use `--imap-mailboxes INBOX,Sent`.
 
-    $ ryespy --listener imap --imap-host mail.example.com --imap-username a@example.com --imap-password helpimacarrot --notifier-sidekiq
+- `--listener ftp` :
+  
+  Check FTP, queue new file paths, and quit (maybe for Cron):
+  
+        $ ryespy --listener ftp --ftp-host ftp.example.com --ftp-username b@example.com --ftp-password helpimacucumber --notifier-sidekiq
+  
+  For PASSIVE mode, use `--ftp-passive`. For non-root or multiple directories, use `--ftp-dirs /DIR1,/DIR2`.
 
-Multiple mailboxes and SSL are also supported.
-
-Check FTP, queue new file paths, and quit (maybe for Cron):
-
-    $ ryespy --listener ftp --ftp-host ftp.example.com --ftp-username b@example.com --ftp-password helpimacucumber --notifier-sidekiq
-
-Multiple directories and PASSIVE mode are also supported.
-
-Check Rackspace Cloud Files, queue new file keys, and quit (maybe for Cron):
-
-    $ ryespy --listener rax-cf --rax-cf-username vegetable --rax-cf-api-key helpimacelery --rax-cf-container vegetable-box
-
-Multiple file key prefixes, authentication endpoints, and regions are also supported. Perhaps your account is in London? Fret not; use `--rax-cf-endpoint uk --rax-cf-region lon`.
+- `--listener rax-cf` :
+  
+  Check Rackspace Cloud Files, queue new file keys, and quit (maybe for Cron):
+  
+        $ ryespy --listener rax-cf --rax-cf-username vegetable --rax-cf-api-key helpimacelery --rax-cf-container vegetable-box --notifier-sidekiq
+  
+  For non-DFW region, use `--rax-cf-region LON`. For non-US auth endpoint, use `--rax-cf-endpoint uk`. Is your Rackspace account in London? Fret not; combine these and use `--rax-cf-endpoint uk --rax-cf-region lon`. For non-* or multiple key prefix filters, use `--rax-cf-prefixes virtual-dir1/,virtual-dir`.
 
 The `--help` is most helpful.
 
