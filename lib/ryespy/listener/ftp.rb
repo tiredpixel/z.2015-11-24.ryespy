@@ -13,6 +13,7 @@ module Ryespy
       def initialize(opts = {})
         @ftp_config = {
           :host     => opts[:host],
+          :port     => opts[:port],
           :passive  => opts[:passive],
           :username => opts[:username],
           :password => opts[:password],
@@ -59,7 +60,9 @@ module Ryespy
       private
       
       def connect_ftp
-        @ftp = Net::FTP.new(@ftp_config[:host])
+        @ftp = Net::FTP.new
+        
+        @ftp.connect(@ftp_config[:host], @ftp_config[:port])
         
         @ftp.passive = @ftp_config[:passive]
         
@@ -70,6 +73,7 @@ module Ryespy
         [
           REDIS_KEY_PREFIX,
           @ftp_config[:host],
+          @ftp_config[:port],
           @ftp_config[:username],
           dir,
         ].join(':')

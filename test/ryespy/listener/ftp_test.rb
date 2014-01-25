@@ -14,6 +14,7 @@ describe Ryespy::Listener::FTP do
     
     @net_ftp = stub
     
+    @net_ftp.stubs(:connect).with('ftp.example.com', 2121)
     @net_ftp.stubs(:passive=)
     @net_ftp.stubs(:login).with('d.adams', 'solongandthanksforallthefish')
     @net_ftp.stubs(:chdir).with('/dolphin')
@@ -22,7 +23,7 @@ describe Ryespy::Listener::FTP do
     @net_ftp.stubs(:size).returns(42)
     @net_ftp.stubs(:close)
     
-    Net::FTP.stubs(:new).with('ftp.example.com').returns(@net_ftp)
+    Net::FTP.stubs(:new).returns(@net_ftp)
   end
   
   describe "#check" do
@@ -33,6 +34,7 @@ describe Ryespy::Listener::FTP do
       
       @ftp = Ryespy::Listener::FTP.new(
         :host      => 'ftp.example.com',
+        :port      => 2121,
         :passive   => true,
         :username  => 'd.adams',
         :password  => 'solongandthanksforallthefish',

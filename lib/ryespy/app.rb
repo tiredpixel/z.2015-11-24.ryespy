@@ -21,6 +21,7 @@ module Ryespy
           :mailboxes => ['INBOX'],
         },
         :ftp => {
+          :port    => 21,
           :passive => false,
           :dirs    => ['/'],
         },
@@ -142,6 +143,7 @@ module Ryespy
     def check_all_ftp
       Listener::FTP.new(
         :host      => @config.ftp[:host],
+        :port      => @config.ftp[:port],
         :passive   => @config.ftp[:passive],
         :username  => @config.ftp[:username],
         :password  => @config.ftp[:password],

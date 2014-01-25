@@ -126,6 +126,7 @@ describe Ryespy::App do
       before do
         @app.configure do |c|
           c.ftp_host     = 'ftp.example.org'
+          c.ftp_port     = 2121
           c.ftp_passive  = true
           c.ftp_username = 'madam.mina@example.com'
           c.ftp_password = 'black'
@@ -135,6 +136,10 @@ describe Ryespy::App do
       
       it "configures ftp_host" do
         @config.ftp_host.must_equal 'ftp.example.org'
+      end
+      
+      it "configures ftp_port" do
+        @config.ftp_port.must_equal 2121
       end
       
       it "configures ftp_passive" do

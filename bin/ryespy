@@ -90,6 +90,10 @@ OptionParser.new do |opts|
     options[:ftp_host] = o
   end
   
+  opts.on("--ftp-port [PORT]", Integer, "Server PORT (default: 21)") do |o|
+    options[:ftp_port] = o
+  end
+  
   opts.on("--[no-]ftp-passive", "Use PASSIVE mode (default: no)") do |o|
     options[:ftp_passive] = o
   end
@@ -208,6 +212,7 @@ end
     ],
     :ftp => [
       :host,
+      :port,
       :passive,
       :username,
       :password,
