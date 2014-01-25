@@ -3,6 +3,8 @@ require 'ostruct'
 require 'redis'
 require 'redis-namespace'
 
+# listener dynamically required in App#setup
+
 
 module Ryespy
   class App
@@ -92,6 +94,7 @@ module Ryespy
     private
     
     def setup
+      require_relative "listener/#{@config.listener}"
     end
     
     def cleanup
@@ -100,12 +103,7 @@ module Ryespy
     def refresh_loop
       while @running do
         begin
-          case @config.listener
-          when :imap
-            check_all_imap
-          when :ftp
-            check_all_ftp
-          end
+          send(:"check_all_#{@config.listener}")
         rescue StandardError => e
           @logger.error { e.to_s }
         end
