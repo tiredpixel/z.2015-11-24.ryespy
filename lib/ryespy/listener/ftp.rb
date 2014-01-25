@@ -7,6 +7,7 @@ module Ryespy
   module Listener
     class FTP
       
+      REDIS_KEY_PREFIX  = 'ftp'.freeze
       SIDEKIQ_JOB_CLASS = 'RyespyFTPJob'.freeze
       
       def initialize(opts = {})
@@ -36,15 +37,15 @@ module Ryespy
       end
       
       def check(dir)
-        @logger.debug { "dir:#{dir}" }
+        @logger.debug { "dir: #{dir}" }
         
-        @logger.debug { "redis_key:#{redis_key(dir)}" }
+        @logger.debug { "redis_key: #{redis_key(dir)}" }
         
         seen_files = @redis.hgetall(redis_key(dir))
         
         unseen_files = get_unseen_files(dir, seen_files)
         
-        @logger.debug { "unseen_files:#{unseen_files}" }
+        @logger.debug { "unseen_files: #{unseen_files}" }
         
         unseen_files.each do |filename, checksum|
           @redis.hset(redis_key(dir), filename, checksum)
@@ -66,7 +67,12 @@ module Ryespy
       end
       
       def redis_key(dir)
-        "#{@ftp_config[:host]}:#{@ftp_config[:username]}:#{dir}"
+        [
+          REDIS_KEY_PREFIX,
+          @ftp_config[:host],
+          @ftp_config[:username],
+          dir,
+        ].join(':')
       end
       
       def get_unseen_files(dir, seen_files)

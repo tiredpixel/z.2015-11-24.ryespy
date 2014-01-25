@@ -7,6 +7,7 @@ module Ryespy
   module Listener
     class IMAP
       
+      REDIS_KEY_PREFIX  = 'imap'.freeze
       SIDEKIQ_JOB_CLASS = 'RyespyIMAPJob'.freeze
       
       def initialize(opts = {})
@@ -37,15 +38,15 @@ module Ryespy
       end
       
       def check(mailbox)
-        @logger.debug { "mailbox:#{mailbox}" }
+        @logger.debug { "mailbox: #{mailbox}" }
         
-        @logger.debug { "redis_key:#{redis_key(mailbox)}" }
+        @logger.debug { "redis_key: #{redis_key(mailbox)}" }
         
         last_seen_uid = @redis.get(redis_key(mailbox)).to_i
         
         unseen_uids = get_unseen_uids(mailbox, last_seen_uid)
         
-        @logger.debug { "unseen_uids:#{unseen_uids}" }
+        @logger.debug { "unseen_uids: #{unseen_uids}" }
         
         unseen_uids.each do |uid|
           @redis.set(redis_key(mailbox), uid)
@@ -68,7 +69,13 @@ module Ryespy
       end
       
       def redis_key(mailbox)
-        "#{@imap_config[:host]},#{@imap_config[:port]}:#{@imap_config[:username]}:#{mailbox}"
+        [
+          REDIS_KEY_PREFIX,
+          @imap_config[:host],
+          @imap_config[:port],
+          @imap_config[:username],
+          mailbox,
+        ].join(':')
       end
       
       def get_unseen_uids(mailbox, last_seen_uid = nil)
