@@ -99,7 +99,7 @@ Check Rackspace Cloud Files, queue new file keys, and quit (maybe for Cron):
 
     $ ryespy --listener rax-cf --rax-cf-username vegetable --rax-cf-api-key helpimacelery --rax-cf-container vegetable-box --notifier-sidekiq
 
-For non-DFW region, use `--rax-cf-region LON`. For non-US auth endpoint, use `--rax-cf-endpoint uk`. Is your Rackspace account in London? Fret not; combine these and use `--rax-cf-endpoint uk --rax-cf-region lon`. For non-* or multiple key prefix filters, use `--rax-cf-prefixes virtual-dir1/,virtual-dir`.
+For non-DFW region, use `--rax-cf-region lon`. For non-US auth endpoint, use `--rax-cf-endpoint uk`. Is your Rackspace account in London? Fret not; combine these and use `--rax-cf-endpoint uk --rax-cf-region lon`. For non-* or multiple key prefix filters, use `--rax-cf-prefixes virtual-dir1/,virtual-dir`.
 
 
 ## Advanced Usage

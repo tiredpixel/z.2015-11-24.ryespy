@@ -17,7 +17,7 @@ module Ryespy
           :auth_url  => Fog::Rackspace.const_get(
             "#{opts[:endpoint].upcase}_AUTH_ENDPOINT"
           ),
-          :region    => opts[:region].to_sym,
+          :region    => opts[:region].downcase.to_sym,
           :username  => opts[:username],
           :api_key   => opts[:api_key],
           :directory => opts[:container],
