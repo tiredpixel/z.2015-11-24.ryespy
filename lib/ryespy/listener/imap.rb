@@ -1,11 +1,9 @@
-require 'logger'
-require 'redis'
 require 'net/imap'
 
 
 module Ryespy
   module Listener
-    class IMAP
+    class IMAP < Base
       
       REDIS_KEY_PREFIX  = 'imap'.freeze
       SIDEKIQ_JOB_CLASS = 'RyespyIMAPJob'.freeze
@@ -19,18 +17,7 @@ module Ryespy
           :password  => opts[:password],
         }
         
-        @notifiers = opts[:notifiers] || []
-        @logger    = opts[:logger] || Logger.new(nil)
-        
-        @redis = Redis.current
-        
-        connect_imap
-        
-        if block_given?
-          yield self
-          
-          close
-        end
+        super(opts)
       end
       
       def close
@@ -59,7 +46,7 @@ module Ryespy
       
       private
       
-      def connect_imap
+      def connect_service
         @imap = Net::IMAP.new(@imap_config[:host], {
           :port => @imap_config[:port],
           :ssl  => @imap_config[:ssl],

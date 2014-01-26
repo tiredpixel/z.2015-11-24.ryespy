@@ -113,7 +113,7 @@ Depend upon the `ryespy` gem in a `Gemfile`, remembering to add any manual depen
     gem 'ryespy'
     gem 'fog' # example manual dependency
 
-Configure Ryespy Redis:
+Configure Ryespy Redis and require Ryespy:
 
     require 'redis'
     require 'redis/namespace'
@@ -121,6 +121,8 @@ Configure Ryespy Redis:
     Redis.current = Redis::Namespace.new('ryespy',
       :redis => Redis.connect(:url => nil) # Redis default
     )
+    
+    require 'ryespy'
 
 Create the notifiers:
 

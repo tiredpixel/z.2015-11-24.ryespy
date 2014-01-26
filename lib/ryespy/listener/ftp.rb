@@ -1,11 +1,9 @@
-require 'logger'
-require 'redis'
 require 'net/ftp'
 
 
 module Ryespy
   module Listener
-    class FTP
+    class FTP < Base
       
       REDIS_KEY_PREFIX  = 'ftp'.freeze
       SIDEKIQ_JOB_CLASS = 'RyespyFTPJob'.freeze
@@ -19,18 +17,7 @@ module Ryespy
           :password => opts[:password],
         }
         
-        @notifiers = opts[:notifiers] || []
-        @logger    = opts[:logger] || Logger.new(nil)
-        
-        @redis = Redis.current
-        
-        connect_ftp
-        
-        if block_given?
-          yield self
-          
-          close
-        end
+        super(opts)
       end
       
       def close
@@ -59,7 +46,7 @@ module Ryespy
       
       private
       
-      def connect_ftp
+      def connect_service
         @ftp = Net::FTP.new
         
         @ftp.connect(@ftp_config[:host], @ftp_config[:port])

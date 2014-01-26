@@ -1,5 +1,3 @@
-require 'logger'
-require 'redis'
 require 'fog'
 
 require_relative 'fogable'
@@ -7,7 +5,7 @@ require_relative 'fogable'
 
 module Ryespy
   module Listener
-    class GoogCS
+    class GoogCS < Base
       
       include Listener::Fogable
       
@@ -21,18 +19,7 @@ module Ryespy
           :directory  => opts[:bucket],
         }
         
-        @notifiers = opts[:notifiers] || []
-        @logger    = opts[:logger] || Logger.new(nil)
-        
-        @redis = Redis.current
-        
-        connect_service
-        
-        if block_given?
-          yield self
-          
-          close
-        end
+        super(opts)
       end
       
       private

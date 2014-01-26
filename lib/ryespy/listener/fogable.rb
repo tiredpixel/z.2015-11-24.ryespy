@@ -2,9 +2,6 @@ module Ryespy
   module Listener
     module Fogable
       
-      def close
-      end
-      
       def check(prefix)
         @logger.debug { "prefix: #{prefix}" }
         
