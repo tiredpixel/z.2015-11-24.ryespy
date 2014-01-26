@@ -4,125 +4,208 @@ $stdout.sync = true
 
 require 'optparse'
 require 'ostruct'
+require 'logger'
 
 require File.expand_path(File.dirname(__FILE__) + '/../lib/ryespy')
 
 
 # = Parse opts
 
-options = OpenStruct.new
-
-options.notifiers = {
-  :sidekiq => [],
-}
+options = OpenStruct.new(
+  :notifiers => {}
+)
 
 OptionParser.new do |opts|
-  opts.banner = "Usage: ryespy [options]"
+  opts.version = "v#{Ryespy::VERSION}"
+  
+  opts.banner = opts.ver
+  
+  opts.separator ""
+  opts.separator "Usage: ryespy [OPTIONS]"
   
   opts.separator ""
   opts.separator "Listener:"
   
-  opts.on("-l", "--listener LISTENER", [:imap, :ftp], "Listener (imap|ftp)") do |o|
-    options[:listener] = o
+  opts.on("-l", "--listener LISTENER", [
+    'imap',
+    'ftp',
+    'amzn-s3',
+    'goog-cs',
+    'rax-cf',
+  ], "Listener (imap|ftp|amzn-s3|goog-cs|rax-cf)") do |o|
+    options[:listener] = o.tr('-', '_').to_sym
   end
   
   opts.separator ""
   opts.separator "Polling:"
   
-  opts.on("-e", "--[no-]eternal", "Run eternally") do |o|
+  opts.on("-e", "--[no-]eternal", "Run eternally (default: no)") do |o|
     options[:eternal] = o
   end
   
-  opts.on("--polling-interval [N]", Integer, "Poll every N seconds when --eternal") do |o|
+  opts.on("--polling-interval [N]", Integer, "Poll every N seconds (default: 60)") do |o|
     options[:polling_interval] = o
   end
   
   opts.separator ""
   opts.separator "Redis:"
   
-  opts.on("--redis-url [URL]", "Connect Redis to URL") do |o|
+  opts.on("--redis-url [URL]", "Ryespy URL (default: Redis default)") do |o|
     options[:redis_url] = o
   end
   
-  opts.on("--redis-ns-ryespy [NS]", "Namespace Redis 'ryespy:' as NS") do |o|
+  opts.on("--redis-ns-ryespy [NS]", "Ryespy namespace (default: ryespy)") do |o|
     options[:redis_ns_ryespy] = o
   end
   
-  opts.on("--redis-ns-notifiers [NS]", "Namespace notifiers Redis 'resque:' as NS") do |o|
-    options[:redis_ns_notifiers] = o
-  end
-  
   opts.separator ""
-  opts.separator "Listener imap:"
+  opts.separator "--listener imap (IMAP) :"
   
-  opts.on("--imap-host HOST", "Connect IMAP with HOST") do |o|
+  opts.on("--imap-host HOST", "Server HOST") do |o|
     options[:imap_host] = o
   end
   
-  opts.on("--imap-port [PORT]", Integer, "Connect IMAP with PORT") do |o|
+  opts.on("--imap-port [PORT]", Integer, "Server PORT (default: 993)") do |o|
     options[:imap_port] = o
   end
   
-  opts.on("--[no-]imap-ssl", "Connect IMAP using SSL") do |o|
+  opts.on("--[no-]imap-ssl", "Use SSL (default: yes)") do |o|
     options[:imap_ssl] = o
   end
   
-  opts.on("--imap-username USERNAME", "Connect IMAP with USERNAME") do |o|
+  opts.on("--imap-username USERNAME", "Auth USERNAME") do |o|
     options[:imap_username] = o
   end
   
-  opts.on("--imap-password PASSWORD", "Connect IMAP with PASSWORD") do |o|
+  opts.on("--imap-password PASSWORD", "Auth PASSWORD") do |o|
     options[:imap_password] = o
   end
   
-  opts.on("--imap-mailboxes [INBOX,DEV]", Array, "Read IMAP MAILBOXES") do |o|
-    options[:imap_mailboxes] = o
+  opts.on("--imap-mailboxes [INBOX,Mu]", Array, "Mailboxes INBOX,Mu (default: INBOX)") do |o|
+    options[:imap_filters] = o
   end
   
   opts.separator ""
-  opts.separator "Listener ftp:"
+  opts.separator "--listener ftp (FTP) :"
   
-  opts.on("--ftp-host HOST", "Connect FTP with HOST") do |o|
+  opts.on("--ftp-host HOST", "Server HOST") do |o|
     options[:ftp_host] = o
   end
   
-  opts.on("--[no-]ftp-passive", "Connect FTP using PASSIVE mode") do |o|
+  opts.on("--ftp-port [PORT]", Integer, "Server PORT (default: 21)") do |o|
+    options[:ftp_port] = o
+  end
+  
+  opts.on("--[no-]ftp-passive", "Use PASSIVE mode (default: no)") do |o|
     options[:ftp_passive] = o
   end
   
-  opts.on("--ftp-username USERNAME", "Connect FTP with USERNAME") do |o|
+  opts.on("--ftp-username USERNAME", "Auth USERNAME") do |o|
     options[:ftp_username] = o
   end
   
-  opts.on("--ftp-password PASSWORD", "Connect FTP with PASSWORD") do |o|
+  opts.on("--ftp-password PASSWORD", "Auth PASSWORD") do |o|
     options[:ftp_password] = o
   end
   
-  opts.on("--ftp-dirs [dir1,dir2]", Array, "Read FTP DIRS") do |o|
-    options[:ftp_dirs] = o
+  opts.on("--ftp-dirs [/D1,/D2]", Array, "Directories /D1,/D2 (default: /)") do |o|
+    options[:ftp_filters] = o
   end
   
   opts.separator ""
-  opts.separator "Notifier sidekiq:"
+  opts.separator "--listener amzn-s3 (Amazon S3) :"
   
-  opts.on("--notifier-sidekiq [URL]", "Notify Sidekiq/Resque at Redis URL") do |o|
-    options.notifiers[:sidekiq] << o
+  opts.on("--amzn-s3-access-key ACCESS", "Account ACCESS key") do |o|
+    options[:amzn_s3_access_key] = o
+  end
+  
+  opts.on("--amzn-s3-secret-key SECRET", "Account SECRET key") do |o|
+    options[:amzn_s3_secret_key] = o
+  end
+  
+  opts.on("--amzn-s3-bucket BUCKET", "Storage BUCKET") do |o|
+    options[:amzn_s3_bucket] = o
+  end
+  
+  opts.on("--amzn-s3-prefixes [P1,P2]", Array, "Prefixes P1,P2 (default: *)") do |o|
+    options[:amzn_s3_filters] = o
+  end
+  
+  opts.separator ""
+  opts.separator "--listener goog-cs (Google Cloud Storage) :"
+  
+  opts.on("--goog-cs-access-key ACCESS", "Account ACCESS key") do |o|
+    options[:goog_cs_access_key] = o
+  end
+  
+  opts.on("--goog-cs-secret-key SECRET", "Account SECRET key") do |o|
+    options[:goog_cs_secret_key] = o
+  end
+  
+  opts.on("--goog-cs-bucket BUCKET", "Storage BUCKET") do |o|
+    options[:goog_cs_bucket] = o
+  end
+  
+  opts.on("--goog-cs-prefixes [P1,P2]", Array, "Prefixes P1,P2 (default: *)") do |o|
+    options[:goog_cs_filters] = o
+  end
+  
+  opts.separator ""
+  opts.separator "--listener rax-cf (Rackspace Cloud Files) :"
+  
+  opts.on("--rax-cf-endpoint [ENDPOINT]", "Auth ENDPOINT (default: us)") do |o|
+    options[:rax_cf_endpoint] = o
+  end
+  
+  opts.on("--rax-cf-username USERNAME", "Account USERNAME") do |o|
+    options[:rax_cf_username] = o
+  end
+  
+  opts.on("--rax-cf-api-key API_KEY", "Account API_KEY") do |o|
+    options[:rax_cf_api_key] = o
+  end
+  
+  opts.on("--rax-cf-container CONTAINER", "Storage CONTAINER") do |o|
+    options[:rax_cf_container] = o
+  end
+  
+  opts.on("--rax-cf-region [REGION]", "Storage REGION (default: dfw)") do |o|
+    options[:rax_cf_region] = o
+  end
+  
+  opts.on("--rax-cf-prefixes [P1,P2]", Array, "Prefixes P1,P2 (default: *)") do |o|
+    options[:rax_cf_filters] = o
+  end
+  
+  opts.separator ""
+  opts.separator "Notifiers:"
+  
+  opts.on("--redis-ns-notifiers [NS]", "Notifiers namespace (default: resque)") do |o|
+    options[:redis_ns_notifiers] = o
+  end
+  
+  opts.on("--notifier-sidekiq [URL]", "Sidekiq Redis URL (default: Redis default)") do |o|
+    (options.notifiers[:sidekiq] ||= []) << o
   end
   
   opts.separator ""
   opts.separator "Other:"
   
-  opts.on("-v", "--[no-]verbose", "Be somewhat verbose") do |o|
-    options[:verbose] = o
+  opts.on("-d", "--debug", "Set debug mode") do |o|
+    options[:debug] = o
   end
   
-  opts.on_tail("--help", "Show this message") do
+  opts.on_tail("--help",
+    "Output (this) help and exit"
+  ) do
     puts opts
     exit
   end
   
-  opts.on_tail("--version", "Show version") do
-    puts "Ryespy version:#{Ryespy::VERSION}"
+  opts.on_tail("--version",
+    "Output version and exit"
+  ) do
+    puts opts.ver
     exit
   end
 end.parse!
@@ -136,62 +219,85 @@ end.parse!
 end
 
 
+# = Create app
+
+@app = Ryespy::App.new(options[:eternal],
+  :logger => Logger.new($stdout)
+)
+
+
 # = Configure
 
-Ryespy.configure do |c|
-  c.log_level = 'DEBUG' if options[:verbose]
+@app.configure do |c|
+  c.log_level = :DEBUG if options[:debug]
   
   c.listener = options[:listener]
   
-  params = [
+  [
     :polling_interval,
     :redis_url,
     :redis_ns_ryespy,
     :redis_ns_notifiers,
     :notifiers,
-  ]
+  ].each { |k| c[k] = options[k] unless options[k].nil? }
   
-  params.concat case c.listener.to_s
-  when 'imap'
-    [
-      :imap_host,
-      :imap_port,
-      :imap_ssl,
-      :imap_username,
-      :imap_password,
-      :imap_mailboxes,
-    ]
-  when 'ftp'
-    [
-      :ftp_host,
-      :ftp_passive,
-      :ftp_username,
-      :ftp_password,
-      :ftp_dirs,
-    ]
-  else
-    []
+  {
+    :imap => [
+      :host,
+      :port,
+      :ssl,
+      :username,
+      :password,
+      :filters, # mailboxes
+    ],
+    :ftp => [
+      :host,
+      :port,
+      :passive,
+      :username,
+      :password,
+      :filters, # dirs
+    ],
+    :amzn_s3 => [
+      :access_key,
+      :secret_key,
+      :bucket,
+      :filters, # prefixes
+    ],
+    :goog_cs => [
+      :access_key,
+      :secret_key,
+      :bucket,
+      :filters, # prefixes
+    ],
+    :rax_cf => [
+      :endpoint,
+      :region,
+      :username,
+      :api_key,
+      :container,
+      :filters, # prefixes
+    ],
+  }[c.listener].each do |k|
+    lk = "#{c.listener}_#{k}".to_sym
+    
+    c[c.listener][k] = options[lk] unless options[lk].nil?
   end
-  
-  params.each { |s| c.send("#{s}=", options[s]) unless options[s].nil? }
 end
 
-@logger = Ryespy.logger
 
+# = Run app
 
-# = Main loop
+trap('INT') { @app.stop }
 
-loop do
-  listener = {
-    'imap' => Ryespy::Listener::IMAP,
-    'ftp'  => Ryespy::Listener::FTP,
-  }[Ryespy.config.listener.to_s].new
+begin
+  @app.start
+rescue => e
+  warn "#{$0}: #{e}"
   
-  listener.check_all
-  
-  break unless options[:eternal]
-  
-  @logger.debug { "Snoring for #{Ryespy.config.polling_interval} s" }
-  
-  sleep Ryespy.config.polling_interval # sleep awhile (snore)
+  if options[:debug]
+    raise # reraise for stacktrace
+  else
+    exit 1 # same non-zero status as when --debug
+  end
 end
