@@ -82,7 +82,7 @@ OptionParser.new do |opts|
   end
   
   opts.on("--imap-mailboxes [INBOX,Mu]", Array, "Mailboxes INBOX,Mu (default: INBOX)") do |o|
-    options[:imap_mailboxes] = o
+    options[:imap_filters] = o
   end
   
   opts.separator ""
@@ -109,7 +109,7 @@ OptionParser.new do |opts|
   end
   
   opts.on("--ftp-dirs [/D1,/D2]", Array, "Directories /D1,/D2 (default: /)") do |o|
-    options[:ftp_dirs] = o
+    options[:ftp_filters] = o
   end
   
   opts.separator ""
@@ -128,7 +128,7 @@ OptionParser.new do |opts|
   end
   
   opts.on("--amzn-s3-prefixes [P1,P2]", Array, "Prefixes P1,P2 (default: *)") do |o|
-    options[:amzn_s3_prefixes] = o
+    options[:amzn_s3_filters] = o
   end
   
   opts.separator ""
@@ -147,7 +147,7 @@ OptionParser.new do |opts|
   end
   
   opts.on("--goog-cs-prefixes [P1,P2]", Array, "Prefixes P1,P2 (default: *)") do |o|
-    options[:goog_cs_prefixes] = o
+    options[:goog_cs_filters] = o
   end
   
   opts.separator ""
@@ -174,7 +174,7 @@ OptionParser.new do |opts|
   end
   
   opts.on("--rax-cf-prefixes [P1,P2]", Array, "Prefixes P1,P2 (default: *)") do |o|
-    options[:rax_cf_prefixes] = o
+    options[:rax_cf_filters] = o
   end
   
   opts.separator ""
@@ -248,7 +248,7 @@ end
       :ssl,
       :username,
       :password,
-      :mailboxes,
+      :filters, # mailboxes
     ],
     :ftp => [
       :host,
@@ -256,19 +256,19 @@ end
       :passive,
       :username,
       :password,
-      :dirs,
+      :filters, # dirs
     ],
     :amzn_s3 => [
       :access_key,
       :secret_key,
       :bucket,
-      :prefixes,
+      :filters, # prefixes
     ],
     :goog_cs => [
       :access_key,
       :secret_key,
       :bucket,
-      :prefixes,
+      :filters, # prefixes
     ],
     :rax_cf => [
       :endpoint,
@@ -276,7 +276,7 @@ end
       :username,
       :api_key,
       :container,
-      :prefixes,
+      :filters, # prefixes
     ],
   }[c.listener].each do |k|
     lk = "#{c.listener}_#{k}".to_sym

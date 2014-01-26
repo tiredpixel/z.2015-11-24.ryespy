@@ -16,25 +16,25 @@ module Ryespy
         :redis_ns_ryespy    => 'ryespy',
         :redis_ns_notifiers => 'resque',
         :imap => {
-          :port      => 993,
-          :ssl       => true,
-          :mailboxes => ['INBOX'],
+          :port    => 993,
+          :ssl     => true,
+          :filters => ['INBOX'], # mailboxes
         },
         :ftp => {
           :port    => 21,
           :passive => false,
-          :dirs    => ['/'],
+          :filters => ['/'], # dirs
         },
         :amzn_s3 => {
-          :prefixes => [''],
+          :filters => [''], # prefixes
         },
         :goog_cs => {
-          :prefixes => [''],
+          :filters => [''], # prefixes
         },
         :rax_cf => {
           :endpoint => :us,
           :region   => :dfw,
-          :prefixes => [''],
+          :filters  => [''], # prefixes
         },
       }
     end
@@ -115,7 +115,7 @@ module Ryespy
     def refresh_loop
       while @running do
         begin
-          send(:"check_all_#{@config.listener}")
+          check_all
         rescue StandardError => e
           @logger.error { e.to_s }
           
@@ -134,69 +134,24 @@ module Ryespy
       end
     end
     
-    def check_all_imap
-      Listener::IMAP.new(
-        :host      => @config.imap[:host],
-        :port      => @config.imap[:port],
-        :ssl       => @config.imap[:ssl],
-        :username  => @config.imap[:username],
-        :password  => @config.imap[:password],
+    def check_all
+      listener_class_map = {
+        :imap    => :IMAP,
+        :ftp     => :FTP,
+        :amzn_s3 => :AmznS3,
+        :goog_cs => :GoogCS,
+        :rax_cf  => :RaxCF,
+      }
+      
+      listener_config = @config[@config.listener].merge({
         :notifiers => notifiers,
         :logger    => @logger,
-      ) do |listener|
-        @config.imap[:mailboxes].each { |m| listener.check(m) }
-      end
-    end
-    
-    def check_all_ftp
-      Listener::FTP.new(
-        :host      => @config.ftp[:host],
-        :port      => @config.ftp[:port],
-        :passive   => @config.ftp[:passive],
-        :username  => @config.ftp[:username],
-        :password  => @config.ftp[:password],
-        :notifiers => notifiers,
-        :logger    => @logger,
-      ) do |listener|
-        @config.ftp[:dirs].each { |d| listener.check(d) }
-      end
-    end
-    
-    def check_all_amzn_s3
-      Listener::AmznS3.new(
-        :access_key => @config.amzn_s3[:access_key],
-        :secret_key => @config.amzn_s3[:secret_key],
-        :bucket     => @config.amzn_s3[:bucket],
-        :notifiers  => notifiers,
-        :logger     => @logger,
-      ) do |listener|
-        @config.amzn_s3[:prefixes].each { |p| listener.check(p) }
-      end
-    end
-    
-    def check_all_goog_cs
-      Listener::GoogCS.new(
-        :access_key => @config.goog_cs[:access_key],
-        :secret_key => @config.goog_cs[:secret_key],
-        :bucket     => @config.goog_cs[:bucket],
-        :notifiers  => notifiers,
-        :logger     => @logger,
-      ) do |listener|
-        @config.goog_cs[:prefixes].each { |p| listener.check(p) }
-      end
-    end
-    
-    def check_all_rax_cf
-      Listener::RaxCF.new(
-        :endpoint  => @config.rax_cf[:endpoint],
-        :region    => @config.rax_cf[:region],
-        :username  => @config.rax_cf[:username],
-        :api_key   => @config.rax_cf[:api_key],
-        :container => @config.rax_cf[:container],
-        :notifiers => notifiers,
-        :logger    => @logger,
-      ) do |listener|
-        @config.rax_cf[:prefixes].each { |p| listener.check(p) }
+      })
+      
+      listener_class = Listener.const_get(listener_class_map[@config.listener])
+      
+      listener_class.new(listener_config) do |listener|
+        listener_config[:filters].each { |f| listener.check(f) }
       end
     end
     

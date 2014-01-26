@@ -88,12 +88,12 @@ describe Ryespy::App do
     describe "listener IMAP" do
       before do
         @app.configure do |c|
-          c.imap_host      = 'imap.example.com'
-          c.imap_port      = 143
-          c.imap_ssl       = false
-          c.imap_username  = 'lucy.westenra@example.com'
-          c.imap_password  = 'white'
-          c.imap_mailboxes = 'BoxA,Sent Messages'
+          c.imap_host     = 'imap.example.com'
+          c.imap_port     = 143
+          c.imap_ssl      = false
+          c.imap_username = 'lucy.westenra@example.com'
+          c.imap_password = 'white'
+          c.imap_filters  = 'BoxA,Sent Messages'
         end
       end
       
@@ -117,8 +117,8 @@ describe Ryespy::App do
         @config.imap_password.must_equal 'white'
       end
       
-      it "configures imap_mailboxes" do
-        @config.imap_mailboxes.must_equal 'BoxA,Sent Messages'
+      it "configures imap_filters" do
+        @config.imap_filters.must_equal 'BoxA,Sent Messages'
       end
     end
     
@@ -130,7 +130,7 @@ describe Ryespy::App do
           c.ftp_passive  = true
           c.ftp_username = 'madam.mina@example.com'
           c.ftp_password = 'black'
-          c.ftp_dirs     = ['BoxA', 'Sent Messages']
+          c.ftp_filters  = ['BoxA', 'Sent Messages']
         end
       end
       
@@ -154,8 +154,8 @@ describe Ryespy::App do
         @config.ftp_password.must_equal 'black'
       end
       
-      it "configures ftp_dirs" do
-        @config.ftp_dirs.must_equal ['BoxA', 'Sent Messages']
+      it "configures ftp_filters" do
+        @config.ftp_filters.must_equal ['BoxA', 'Sent Messages']
       end
     end
     
@@ -165,7 +165,7 @@ describe Ryespy::App do
           c.amzn_s3_access_key = 'r.m.renfield'
           c.amzn_s3_secret_key = 'master'
           c.amzn_s3_bucket     = 'i-can-wait'
-          c.amzn_s3_prefixes   = ['flies/', 'spiders/']
+          c.amzn_s3_filters    = ['flies/', 'spiders/']
         end
       end
       
@@ -181,8 +181,8 @@ describe Ryespy::App do
         @config.amzn_s3_bucket.must_equal 'i-can-wait'
       end
       
-      it "configures amzn_s3_prefixes" do
-        @config.amzn_s3_prefixes.must_equal ["flies/", "spiders/"]
+      it "configures amzn_s3_filters" do
+        @config.amzn_s3_filters.must_equal ["flies/", "spiders/"]
       end
     end
     
@@ -192,7 +192,7 @@ describe Ryespy::App do
           c.goog_cs_access_key = 'r.m.renfield'
           c.goog_cs_secret_key = 'master'
           c.goog_cs_bucket     = 'i-can-wait'
-          c.goog_cs_prefixes   = ['flies/', 'spiders/']
+          c.goog_cs_filters    = ['flies/', 'spiders/']
         end
       end
       
@@ -208,8 +208,8 @@ describe Ryespy::App do
         @config.goog_cs_bucket.must_equal 'i-can-wait'
       end
       
-      it "configures goog_cs_prefixes" do
-        @config.goog_cs_prefixes.must_equal ["flies/", "spiders/"]
+      it "configures goog_cs_filters" do
+        @config.goog_cs_filters.must_equal ["flies/", "spiders/"]
       end
     end
     
@@ -221,7 +221,7 @@ describe Ryespy::App do
           c.rax_cf_username  = 'van.helsing'
           c.rax_cf_api_key   = 'M.D., D.Ph., D.Litt., etc.'
           c.rax_cf_container = 'the-milk-that-is-spilt-cries-not-out-afterwards'
-          c.rax_cf_prefixes  = ['abraham/', 'van/']
+          c.rax_cf_filters   = ['abraham/', 'van/']
         end
       end
       
@@ -245,8 +245,8 @@ describe Ryespy::App do
         @config.rax_cf_container.must_equal 'the-milk-that-is-spilt-cries-not-out-afterwards'
       end
       
-      it "configures rax_cf_prefixes" do
-        @config.rax_cf_prefixes.must_equal ["abraham/", "van/"]
+      it "configures rax_cf_filters" do
+        @config.rax_cf_filters.must_equal ["abraham/", "van/"]
       end
     end
   end
