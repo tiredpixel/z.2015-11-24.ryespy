@@ -28,6 +28,9 @@ module Ryespy
         :amzn_s3 => {
           :prefixes => [''],
         },
+        :goog_cs => {
+          :prefixes => [''],
+        },
         :rax_cf => {
           :endpoint => :us,
           :region   => :dfw,
@@ -168,6 +171,18 @@ module Ryespy
         :logger     => @logger,
       ) do |listener|
         @config.amzn_s3[:prefixes].each { |p| listener.check(p) }
+      end
+    end
+    
+    def check_all_goog_cs
+      Listener::GoogCS.new(
+        :access_key => @config.goog_cs[:access_key],
+        :secret_key => @config.goog_cs[:secret_key],
+        :bucket     => @config.goog_cs[:bucket],
+        :notifiers  => notifiers,
+        :logger     => @logger,
+      ) do |listener|
+        @config.goog_cs[:prefixes].each { |p| listener.check(p) }
       end
     end
     

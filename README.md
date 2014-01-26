@@ -4,16 +4,17 @@
 [![Build Status](https://travis-ci.org/tiredpixel/ryespy.png?branch=master,stable)](https://travis-ci.org/tiredpixel/ryespy)
 [![Code Climate](https://codeclimate.com/github/tiredpixel/ryespy.png)](https://codeclimate.com/github/tiredpixel/ryespy)
 
-[Sidekiq](https://github.com/mperham/sidekiq) /
-[Resque](https://github.com/resque/resque) IMAP, FTP, Amazon S3, Rackspace Cloud Files listener.
+[Sidekiq](https://github.com/mperham/sidekiq)/[Resque](https://github.com/resque/resque)
+IMAP, FTP, Amazon S3, Google Cloud Storage, Rackspace Cloud Files listener.
 
 Ryespy provides an executable for listening to
 IMAP mailboxes,
 FTP folders,
 Amazon S3 buckets,
+Google Cloud Storage buckets,
 or Rackspace Cloud Files containers,
 keeps track of what it's seen using [Redis](http://redis.io), and writes
-Sidekiq- / Resque-compatible payloads.
+Sidekiq/Resque-compatible payloads.
 
 Ryespy was inspired by [Redimap](https://github.com/tiredpixel/redimap).
 Yes, it's sometimes possible to inspire oneself.
@@ -35,6 +36,10 @@ These externals are required:
 Listener dependencies are required dynamically. That means that it may be necessary to manually install the indicated gems if you are using that listener. If you are not using that listener, there should be no need to install the dependencies.
 
 - `--listener amzn-s3` :
+  
+        $ gem install fog -v '~> 1.19'
+
+- `--listener goog-cs` :
   
         $ gem install fog -v '~> 1.19'
 
@@ -79,6 +84,14 @@ Check Amazon S3, queue new file keys, and quit (maybe for Cron):
     $ ryespy --listener amzn-s3 --amzn-s3-access-key c/example/com --amzn-s3-secret-key helpimabroccoli --amzn-s3-bucket vegetable-box --notifier-sidekiq
 
 For non-* or multiple key prefix filters, use `--amzn-s3-prefixes virtual-dir1/,virtual-dir`.
+
+### Google Cloud Storage Listener
+
+Check Google Cloud Storage, queue new file keys, and quit (maybe for Cron):
+
+    $ ryespy --listener goog-cs --goog-cs-access-key d/example/com --goog-cs-secret-key helpimanasparagus --goog-cs-bucket vegetable-box --notifier-sidekiq
+
+For non-* or multiple key prefix filters, use `--goog-cs-prefixes virtual-dir1/,virtual-dir`.
 
 ### Rackspace Cloud Files Listener
 

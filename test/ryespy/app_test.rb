@@ -186,6 +186,33 @@ describe Ryespy::App do
       end
     end
     
+    describe "listener goog-cs" do
+      before do
+        @app.configure do |c|
+          c.goog_cs_access_key = 'r.m.renfield'
+          c.goog_cs_secret_key = 'master'
+          c.goog_cs_bucket     = 'i-can-wait'
+          c.goog_cs_prefixes   = ['flies/', 'spiders/']
+        end
+      end
+      
+      it "configures goog_cs_access_key" do
+        @config.goog_cs_access_key.must_equal 'r.m.renfield'
+      end
+      
+      it "configures goog_cs_secret_key" do
+        @config.goog_cs_secret_key.must_equal 'master'
+      end
+      
+      it "configures goog_cs_bucket" do
+        @config.goog_cs_bucket.must_equal 'i-can-wait'
+      end
+      
+      it "configures goog_cs_prefixes" do
+        @config.goog_cs_prefixes.must_equal ["flies/", "spiders/"]
+      end
+    end
+    
     describe "listener rax-cf" do
       before do
         @app.configure do |c|

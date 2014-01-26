@@ -30,8 +30,9 @@ OptionParser.new do |opts|
     'imap',
     'ftp',
     'amzn-s3',
+    'goog-cs',
     'rax-cf',
-  ], "Listener (imap|ftp|amzn-s3|rax-cf)") do |o|
+  ], "Listener (imap|ftp|amzn-s3|goog-cs|rax-cf)") do |o|
     options[:listener] = o.tr('-', '_').to_sym
   end
   
@@ -128,6 +129,25 @@ OptionParser.new do |opts|
   
   opts.on("--amzn-s3-prefixes [P1,P2]", Array, "Prefixes P1,P2 (default: *)") do |o|
     options[:amzn_s3_prefixes] = o
+  end
+  
+  opts.separator ""
+  opts.separator "--listener goog-cs (Google Cloud Storage) :"
+  
+  opts.on("--goog-cs-access-key ACCESS", "Account ACCESS key") do |o|
+    options[:goog_cs_access_key] = o
+  end
+  
+  opts.on("--goog-cs-secret-key SECRET", "Account SECRET key") do |o|
+    options[:goog_cs_secret_key] = o
+  end
+  
+  opts.on("--goog-cs-bucket BUCKET", "Storage BUCKET") do |o|
+    options[:goog_cs_bucket] = o
+  end
+  
+  opts.on("--goog-cs-prefixes [P1,P2]", Array, "Prefixes P1,P2 (default: *)") do |o|
+    options[:goog_cs_prefixes] = o
   end
   
   opts.separator ""
@@ -239,6 +259,12 @@ end
       :dirs,
     ],
     :amzn_s3 => [
+      :access_key,
+      :secret_key,
+      :bucket,
+      :prefixes,
+    ],
+    :goog_cs => [
       :access_key,
       :secret_key,
       :bucket,
