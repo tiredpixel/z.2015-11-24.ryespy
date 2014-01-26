@@ -2,6 +2,9 @@ module Ryespy
   module Listener
     module Fogable
       
+      def close
+      end
+      
       def check(prefix)
         @logger.debug { "prefix: #{prefix}" }
         
@@ -29,10 +32,17 @@ module Ryespy
       
       private
       
+      def redis_key
+        [
+          self.class::REDIS_KEY_PREFIX,
+          @config[:directory],
+        ].join(':')
+      end
+      
       def get_unseen_files(prefix, seen_files)
         files = {}
         
-        @fog_storage.directories.get(@cf_config[:directory],
+        @fog_storage.directories.get(@config[:directory],
           :prefix => prefix
         ).files.each do |file|
           if file.content_type == 'application/directory' || file.content_length == 0

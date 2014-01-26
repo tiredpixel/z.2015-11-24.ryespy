@@ -15,7 +15,7 @@ module Ryespy
       SIDEKIQ_JOB_CLASS = 'RyespyRaxCFJob'.freeze
       
       def initialize(opts = {})
-        @cf_config = {
+        @config = {
           :auth_url  => Fog::Rackspace.const_get(
             "#{opts[:endpoint].upcase}_AUTH_ENDPOINT"
           ),
@@ -30,7 +30,7 @@ module Ryespy
         
         @redis = Redis.current
         
-        connect_fog_storage
+        connect_service
         
         if block_given?
           yield self
@@ -39,18 +39,15 @@ module Ryespy
         end
       end
       
-      def close
-      end
-      
       private
       
-      def connect_fog_storage
+      def connect_service
         @fog_storage = Fog::Storage.new({
           :provider           => 'Rackspace',
-          :rackspace_auth_url => @cf_config[:auth_url],
-          :rackspace_region   => @cf_config[:region],
-          :rackspace_username => @cf_config[:username],
-          :rackspace_api_key  => @cf_config[:api_key],
+          :rackspace_auth_url => @config[:auth_url],
+          :rackspace_region   => @config[:region],
+          :rackspace_username => @config[:username],
+          :rackspace_api_key  => @config[:api_key],
         })
       end
       
@@ -58,9 +55,9 @@ module Ryespy
         # CF container (directory) is unique across an account (region?).
         [
           REDIS_KEY_PREFIX,
-          @cf_config[:username],
-          @cf_config[:directory],
-          @cf_config[:region],
+          @config[:username],
+          @config[:directory],
+          @config[:region],
         ].join(':')
       end
       

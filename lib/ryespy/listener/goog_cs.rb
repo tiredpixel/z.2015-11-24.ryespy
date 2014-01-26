@@ -15,7 +15,7 @@ module Ryespy
       SIDEKIQ_JOB_CLASS = 'RyespyGoogCSJob'.freeze
       
       def initialize(opts = {})
-        @cf_config = {
+        @config = {
           :access_key => opts[:access_key],
           :secret_key => opts[:secret_key],
           :directory  => opts[:bucket],
@@ -26,7 +26,7 @@ module Ryespy
         
         @redis = Redis.current
         
-        connect_fog_storage
+        connect_service
         
         if block_given?
           yield self
@@ -35,25 +35,14 @@ module Ryespy
         end
       end
       
-      def close
-      end
-      
       private
       
-      def connect_fog_storage
+      def connect_service
         @fog_storage = Fog::Storage.new({
           :provider                         => 'Google',
-          :google_storage_access_key_id     => @cf_config[:access_key],
-          :google_storage_secret_access_key => @cf_config[:secret_key],
+          :google_storage_access_key_id     => @config[:access_key],
+          :google_storage_secret_access_key => @config[:secret_key],
         })
-      end
-      
-      def redis_key
-        # cs bucket (directory) is unique across all accounts and projects.
-        [
-          REDIS_KEY_PREFIX,
-          @cf_config[:directory],
-        ].join(':')
       end
       
     end
