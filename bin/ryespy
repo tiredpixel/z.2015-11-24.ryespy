@@ -29,8 +29,9 @@ OptionParser.new do |opts|
   opts.on("-l", "--listener LISTENER", [
     'imap',
     'ftp',
+    'amzn-s3',
     'rax-cf',
-  ], "Listener (imap|ftp|rax-cf)") do |o|
+  ], "Listener (imap|ftp|amzn-s3|rax-cf)") do |o|
     options[:listener] = o.tr('-', '_').to_sym
   end
   
@@ -108,6 +109,25 @@ OptionParser.new do |opts|
   
   opts.on("--ftp-dirs [/D1,/D2]", Array, "Directories /D1,/D2 (default: /)") do |o|
     options[:ftp_dirs] = o
+  end
+  
+  opts.separator ""
+  opts.separator "--listener amzn-s3 (Amazon S3) :"
+  
+  opts.on("--amzn-s3-access-key ACCESS", "Account ACCESS key") do |o|
+    options[:amzn_s3_access_key] = o
+  end
+  
+  opts.on("--amzn-s3-secret-key SECRET", "Account SECRET key") do |o|
+    options[:amzn_s3_secret_key] = o
+  end
+  
+  opts.on("--amzn-s3-bucket BUCKET", "Storage BUCKET") do |o|
+    options[:amzn_s3_bucket] = o
+  end
+  
+  opts.on("--amzn-s3-prefixes [P1,P2]", Array, "Prefixes P1,P2 (default: *)") do |o|
+    options[:amzn_s3_prefixes] = o
   end
   
   opts.separator ""
@@ -217,6 +237,12 @@ end
       :username,
       :password,
       :dirs,
+    ],
+    :amzn_s3 => [
+      :access_key,
+      :secret_key,
+      :bucket,
+      :prefixes,
     ],
     :rax_cf => [
       :endpoint,

@@ -5,11 +5,12 @@
 [![Code Climate](https://codeclimate.com/github/tiredpixel/ryespy.png)](https://codeclimate.com/github/tiredpixel/ryespy)
 
 [Sidekiq](https://github.com/mperham/sidekiq) /
-[Resque](https://github.com/resque/resque) IMAP, FTP, Rackspace Cloud Files listener.
+[Resque](https://github.com/resque/resque) IMAP, FTP, Amazon S3, Rackspace Cloud Files listener.
 
 Ryespy provides an executable for listening to
 IMAP mailboxes,
 FTP folders,
+Amazon S3 buckets,
 or Rackspace Cloud Files containers,
 keeps track of what it's seen using [Redis](http://redis.io), and writes
 Sidekiq- / Resque-compatible payloads.
@@ -32,6 +33,10 @@ These externals are required:
 - [Redis](http://redis.io)
 
 Listener dependencies are required dynamically. That means that it may be necessary to manually install the indicated gems if you are using that listener. If you are not using that listener, there should be no need to install the dependencies.
+
+- `--listener amzn-s3` :
+  
+        $ gem install fog -v '~> 1.19'
 
 - `--listener rax-cf` :
   
@@ -62,6 +67,14 @@ It is necessary to specify a listener and at least one notifier. Currently, the 
   
   For PASSIVE mode, use `--ftp-passive`. For non-root or multiple directories, use `--ftp-dirs /DIR1,/DIR2`.
 
+- `--listener amzn-s3` :
+  
+  Check Amazon S3, queue new file keys, and quit (maybe for Cron):
+  
+        $ ryespy --listener amzn-s3 --amzn-s3-access-key c/example/com --amzn-s3-secret-key helpimabroccoli --amzn-s3-bucket vegetable-box --notifier-sidekiq
+  
+  For non-* or multiple key prefix filters, use `--amzn-s3-prefixes virtual-dir1/,virtual-dir`.
+
 - `--listener rax-cf` :
   
   Check Rackspace Cloud Files, queue new file keys, and quit (maybe for Cron):
@@ -91,9 +104,7 @@ on GitHub. And don't forget you can become a [stargazer](https://github.com/tire
 
 Dear Me, Here is a vague wishlist:
 
-- Refactoring and testing
 - Additional notifiers (e.g. URL ?)
-- Additional listeners (e.g. AWS S3 ?)
 
 Also take a look at the [issue tracker](https://github.com/tiredpixel/ryespy/issues).
 

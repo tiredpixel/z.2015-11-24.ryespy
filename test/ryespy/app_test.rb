@@ -159,6 +159,33 @@ describe Ryespy::App do
       end
     end
     
+    describe "listener amzn-s3" do
+      before do
+        @app.configure do |c|
+          c.amzn_s3_access_key = 'r.m.renfield'
+          c.amzn_s3_secret_key = 'master'
+          c.amzn_s3_bucket     = 'i-can-wait'
+          c.amzn_s3_prefixes   = ['flies/', 'spiders/']
+        end
+      end
+      
+      it "configures amzn_s3_access_key" do
+        @config.amzn_s3_access_key.must_equal 'r.m.renfield'
+      end
+      
+      it "configures amzn_s3_secret_key" do
+        @config.amzn_s3_secret_key.must_equal 'master'
+      end
+      
+      it "configures amzn_s3_bucket" do
+        @config.amzn_s3_bucket.must_equal 'i-can-wait'
+      end
+      
+      it "configures amzn_s3_prefixes" do
+        @config.amzn_s3_prefixes.must_equal ["flies/", "spiders/"]
+      end
+    end
+    
     describe "listener rax-cf" do
       before do
         @app.configure do |c|

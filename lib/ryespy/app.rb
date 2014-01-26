@@ -25,6 +25,9 @@ module Ryespy
           :passive => false,
           :dirs    => ['/'],
         },
+        :amzn_s3 => {
+          :prefixes => [''],
+        },
         :rax_cf => {
           :endpoint => :us,
           :region   => :dfw,
@@ -151,6 +154,18 @@ module Ryespy
         :logger    => @logger,
       ) do |listener|
         @config.ftp[:dirs].each { |d| listener.check(d) }
+      end
+    end
+    
+    def check_all_amzn_s3
+      Listener::AmznS3.new(
+        :access_key => @config.amzn_s3[:access_key],
+        :secret_key => @config.amzn_s3[:secret_key],
+        :bucket     => @config.amzn_s3[:bucket],
+        :notifiers  => notifiers,
+        :logger     => @logger,
+      ) do |listener|
+        @config.amzn_s3[:prefixes].each { |p| listener.check(p) }
       end
     end
     
