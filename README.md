@@ -51,41 +51,88 @@ View the available options:
 
 It is necessary to specify a listener and at least one notifier. Currently, the only notifier is `--notifier-sidekiq` (this must be specified).
 
-- `--listener imap` :
-  
-  Check IMAP, queue new email UIDs, and quit (maybe for Cron):
-  
-        $ ryespy --listener imap --imap-host mail.example.com --imap-username a@example.com --imap-password helpimacarrot --notifier-sidekiq
-  
-  For non-SSL, use `--no-imap-ssl`. For non-INBOX or multiple mailboxes, use `--imap-mailboxes INBOX,Sent`.
-
-- `--listener ftp` :
-  
-  Check FTP, queue new file paths, and quit (maybe for Cron):
-  
-        $ ryespy --listener ftp --ftp-host ftp.example.com --ftp-username b@example.com --ftp-password helpimacucumber --notifier-sidekiq
-  
-  For PASSIVE mode, use `--ftp-passive`. For non-root or multiple directories, use `--ftp-dirs /DIR1,/DIR2`.
-
-- `--listener amzn-s3` :
-  
-  Check Amazon S3, queue new file keys, and quit (maybe for Cron):
-  
-        $ ryespy --listener amzn-s3 --amzn-s3-access-key c/example/com --amzn-s3-secret-key helpimabroccoli --amzn-s3-bucket vegetable-box --notifier-sidekiq
-  
-  For non-* or multiple key prefix filters, use `--amzn-s3-prefixes virtual-dir1/,virtual-dir`.
-
-- `--listener rax-cf` :
-  
-  Check Rackspace Cloud Files, queue new file keys, and quit (maybe for Cron):
-  
-        $ ryespy --listener rax-cf --rax-cf-username vegetable --rax-cf-api-key helpimacelery --rax-cf-container vegetable-box --notifier-sidekiq
-  
-  For non-DFW region, use `--rax-cf-region LON`. For non-US auth endpoint, use `--rax-cf-endpoint uk`. Is your Rackspace account in London? Fret not; combine these and use `--rax-cf-endpoint uk --rax-cf-region lon`. For non-* or multiple key prefix filters, use `--rax-cf-prefixes virtual-dir1/,virtual-dir`.
-
 The `--help` is most helpful.
 
 Use `--eternal` to run eternally (no need for Cron).
+
+
+### IMAP Listener
+
+Check IMAP, queue new email UIDs, and quit (maybe for Cron):
+
+    $ ryespy --listener imap --imap-host mail.example.com --imap-username a@example.com --imap-password helpimacarrot --notifier-sidekiq
+
+For non-SSL, use `--no-imap-ssl`. For non-INBOX or multiple mailboxes, use `--imap-mailboxes INBOX,Sent`.
+
+### FTP Listener
+
+Check FTP, queue new file paths, and quit (maybe for Cron):
+
+    $ ryespy --listener ftp --ftp-host ftp.example.com --ftp-username b@example.com --ftp-password helpimacucumber --notifier-sidekiq
+
+For PASSIVE mode, use `--ftp-passive`. For non-root or multiple directories, use `--ftp-dirs /DIR1,/DIR2`.
+
+### Amazon S3 Listener
+
+Check Amazon S3, queue new file keys, and quit (maybe for Cron):
+
+    $ ryespy --listener amzn-s3 --amzn-s3-access-key c/example/com --amzn-s3-secret-key helpimabroccoli --amzn-s3-bucket vegetable-box --notifier-sidekiq
+
+For non-* or multiple key prefix filters, use `--amzn-s3-prefixes virtual-dir1/,virtual-dir`.
+
+### Rackspace Cloud Files Listener
+
+Check Rackspace Cloud Files, queue new file keys, and quit (maybe for Cron):
+
+    $ ryespy --listener rax-cf --rax-cf-username vegetable --rax-cf-api-key helpimacelery --rax-cf-container vegetable-box --notifier-sidekiq
+
+For non-DFW region, use `--rax-cf-region LON`. For non-US auth endpoint, use `--rax-cf-endpoint uk`. Is your Rackspace account in London? Fret not; combine these and use `--rax-cf-endpoint uk --rax-cf-region lon`. For non-* or multiple key prefix filters, use `--rax-cf-prefixes virtual-dir1/,virtual-dir`.
+
+
+## Advanced Usage
+
+If you want to do something rather more magical, such as checking multiple accounts for a listener or even multiple listeners, then you may wish to use the Ryespy library directly instead of the `ryespy` executable.
+
+Depend upon the `ryespy` gem in a `Gemfile`, remembering to add any manual dependencies for listeners as detailed in [Installation](#installation):
+
+    # Gemfile
+    
+    gem 'ryespy'
+    gem 'fog' # example manual dependency
+
+Configure Ryespy Redis:
+
+    require 'redis'
+    require 'redis/namespace'
+    
+    Redis.current = Redis::Namespace.new('ryespy',
+      :redis => Redis.connect(:url => nil) # Redis default
+    )
+
+Create the notifiers:
+
+    require 'ryespy/notifier/sidekiq'
+    
+    notifiers = []
+    notifiers << Ryespy::Notifier::Sidekiq.new(
+      :url       => nil, # Redis default
+      :namespace => 'resque'
+    )
+
+For each listener, configure like in `ryespy --help` but without the listener prefix and with `-` changed to `_` (e.g. `--amzn-s3-access-key` => `:access_key`). Pass in an array of notifiers. Note that the `check()` argument varies per listener, meaning IMAP mailbox, FTP directory, or storage key prefix.
+
+    require 'ryespy/listener/amzn_s3'
+    
+    Ryespy::Listener::AmznS3.new(
+      :access_key => 'ACCESS_KEY',
+      :secret_key => 'SECRET_KEY',
+      :bucket     => 'BUCKET',
+      :notifiers  => notifiers
+    ) do |listener|
+      listener.check('prefix/')
+    end
+
+That's about the size of it.
 
 
 ## Stay Tuned
