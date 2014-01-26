@@ -167,7 +167,7 @@ describe Ryespy::App do
           c.rax_cf_username  = 'van.helsing'
           c.rax_cf_api_key   = 'M.D., D.Ph., D.Litt., etc.'
           c.rax_cf_container = 'the-milk-that-is-spilt-cries-not-out-afterwards'
-          c.rax_cf_prefixes  = ['host/', 'cross/']
+          c.rax_cf_prefixes  = ['abraham/', 'van/']
         end
       end
       
@@ -192,7 +192,7 @@ describe Ryespy::App do
       end
       
       it "configures rax_cf_prefixes" do
-        @config.rax_cf_prefixes.must_equal ["host/", "cross/"]
+        @config.rax_cf_prefixes.must_equal ["abraham/", "van/"]
       end
     end
   end

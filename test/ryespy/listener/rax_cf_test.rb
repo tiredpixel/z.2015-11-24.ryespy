@@ -9,13 +9,13 @@ describe Ryespy::Listener::RaxCF do
     etag = 'dvYAPmJPy8nyqtR8hqqPYIagWEDuZ9FN'
     
     @files = [
-      stub(:content_type => 'application/directory', :key => 'host/', :etag => etag),
-      stub(:content_type => 'text/plain', :key => 'host/bread.txt', :etag => etag),
-      stub(:content_type => 'text/plain', :key => 'host/wine.txt', :etag => etag),
-      stub(:content_type => 'application/directory', :key => 'h/', :etag => etag),
-      stub(:content_type => 'text/plain', :key => 'h/host_README.txt', :etag => etag),
-      stub(:content_type => 'application/directory', :key => 'cross/', :etag => etag),
-      stub(:content_type => 'text/plain', :key => 'cross/cross.txt', :etag => etag),
+      stub(:content_length => 0, :content_type => 'application/directory', :key => 'abraham/',             :etag => etag),
+      stub(:content_length => 1, :content_type => 'text/plain',            :key => 'abraham/a.txt',        :etag => etag),
+      stub(:content_length => 1, :content_type => 'text/plain',            :key => 'abraham/b.txt',        :etag => etag),
+      stub(:content_length => 0, :content_type => 'application/directory', :key => 'a/',                   :etag => etag),
+      stub(:content_length => 1, :content_type => 'text/plain',            :key => 'a/abraham_README.txt', :etag => etag),
+      stub(:content_length => 0, :content_type => 'application/directory', :key => 'van/',                 :etag => etag),
+      stub(:content_length => 1, :content_type => 'text/plain',            :key => 'van/van.txt',          :etag => etag),
     ]
     
     @files_no_dirs = @files.select { |f| f.content_type != 'application/directory' }
@@ -25,14 +25,14 @@ describe Ryespy::Listener::RaxCF do
     @fog_storage_directories = stub
     
     @fog_storage_directories.stubs(:get).with('tmtiscnoa', {
-      :prefix => 'host/'
-    }).returns(stub(:files => @files.select { |f| f.key =~ /^host\// }))
+      :prefix => 'abraham/'
+    }).returns(stub(:files => @files.select { |f| f.key =~ /^abraham\// }))
     @fog_storage_directories.stubs(:get).with('tmtiscnoa', {
-      :prefix => 'h'
-    }).returns(stub(:files => @files.select { |f| f.key =~ /^h/ }))
+      :prefix => 'a'
+    }).returns(stub(:files => @files.select { |f| f.key =~ /^a/ }))
     @fog_storage_directories.stubs(:get).with('tmtiscnoa', {
-      :prefix => 'cross/'
-    }).returns(stub(:files => @files.select { |f| f.key =~ /^cross\// }))
+      :prefix => 'van/'
+    }).returns(stub(:files => @files.select { |f| f.key =~ /^van\// }))
     @fog_storage_directories.stubs(:get).with('tmtiscnoa', {
       :prefix => ''
     }).returns(stub(:files => @files))
@@ -80,62 +80,62 @@ describe Ryespy::Listener::RaxCF do
       @rax_cf.check('')
     end
     
-    it "notifies when new files prefix cross/" do
-      @files_no_dirs.select { |f| f.key =~ /^cross\// }.each do |file|
+    it "notifies when new files prefix van/" do
+      @files_no_dirs.select { |f| f.key =~ /^van\// }.each do |file|
         @notifier.expects(:notify).with('RyespyRaxCFJob', [file.key]).once
       end
       
-      @rax_cf.check('cross/')
+      @rax_cf.check('van/')
     end
     
-    it "notifies when new files prefix h" do
-      @files_no_dirs.select { |f| f.key =~ /^h/ }.each do |file|
+    it "notifies when new files prefix a" do
+      @files_no_dirs.select { |f| f.key =~ /^a/ }.each do |file|
         @notifier.expects(:notify).with('RyespyRaxCFJob', [file.key]).once
       end
       
-      @rax_cf.check('h')
+      @rax_cf.check('a')
     end
     
     it "doesn't notify when no new files" do
       @notifier.expects(:notify).times(2)
       
-      @rax_cf.check('host/')
+      @rax_cf.check('abraham/')
       
       @notifier.expects(:notify).never
       
-      @rax_cf.check('host/')
+      @rax_cf.check('abraham/')
     end
     
     it "doesn't notify when no new files prefix subset" do
       @notifier.expects(:notify).times(3)
       
-      @rax_cf.check('h')
+      @rax_cf.check('a')
       
       @notifier.expects(:notify).never
       
-      @rax_cf.check('host/')
+      @rax_cf.check('abraham/')
     end
     
     it "notifies when new files prefix distinct" do
       @notifier.expects(:notify).times(3)
       
-      @rax_cf.check('h')
+      @rax_cf.check('a')
       
       @notifier.expects(:notify).times(1)
       
-      @rax_cf.check('cross/')
+      @rax_cf.check('van/')
     end
     
     it "notifies when changed etag" do
       @notifier.expects(:notify).times(2)
       
-      @rax_cf.check('host/')
+      @rax_cf.check('abraham/')
       
       @files[1].stubs(:etag).returns(-2303600400)
       
-      @notifier.expects(:notify).with('RyespyRaxCFJob', ['host/bread.txt']).once
+      @notifier.expects(:notify).with('RyespyRaxCFJob', ['abraham/a.txt']).once
       
-      @rax_cf.check('host/')
+      @rax_cf.check('abraham/')
     end
   end
   

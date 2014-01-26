@@ -2,10 +2,14 @@ require 'logger'
 require 'redis'
 require 'fog'
 
+require_relative 'fogable'
+
 
 module Ryespy
   module Listener
     class RaxCF
+      
+      include Listener::Fogable
       
       REDIS_KEY_PREFIX  = 'rax_cf'.freeze
       SIDEKIQ_JOB_CLASS = 'RyespyRaxCFJob'.freeze
@@ -18,7 +22,7 @@ module Ryespy
           :region    => opts[:region].to_sym,
           :username  => opts[:username],
           :api_key   => opts[:api_key],
-          :container => opts[:container],
+          :directory => opts[:container],
         }
         
         @notifiers = opts[:notifiers] || []
@@ -38,27 +42,6 @@ module Ryespy
       def close
       end
       
-      def check(prefix)
-        @logger.debug { "prefix: #{prefix}" }
-        
-        @logger.debug { "redis_key: #{redis_key}" }
-        
-        seen_files = @redis.hgetall(redis_key)
-        
-        unseen_files = get_unseen_files(prefix, seen_files)
-        
-        @logger.debug { "unseen_files: #{unseen_files}" }
-        
-        unseen_files.each do |filename, checksum|
-          @redis.hset(redis_key, filename, checksum)
-          
-          # SEE: #redis_key for why prefix is not passed to notifiers
-          @notifiers.each { |n| n.notify(SIDEKIQ_JOB_CLASS, [filename]) }
-        end
-        
-        @logger.info { "#{prefix}* has #{unseen_files.count} new files" }
-      end
-      
       private
       
       def connect_fog_storage
@@ -72,31 +55,13 @@ module Ryespy
       end
       
       def redis_key
-        # CF prefix is not included as it is part of CF key, and list operations
-        # return files (virtually) recursively. Constructing Redis key in this
-        # way means a file matching multiple prefixes will only notify once.
+        # CF container (directory) is unique across an account (region?).
         [
           REDIS_KEY_PREFIX,
           @cf_config[:username],
-          @cf_config[:container],
+          @cf_config[:directory],
           @cf_config[:region],
         ].join(':')
-      end
-      
-      def get_unseen_files(prefix, seen_files)
-        files = {}
-        
-        @fog_storage.directories.get(@cf_config[:container],
-          :prefix => prefix
-        ).files.each do |file|
-          next if file.content_type == 'application/directory' # virtual dirs
-          
-          if seen_files[file.key] != file.etag # etag is server-side checksum
-            files[file.key] = file.etag
-          end
-        end
-        
-        files
       end
       
     end
