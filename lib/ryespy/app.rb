@@ -115,6 +115,8 @@ module Ryespy
           send(:"check_all_#{@config.listener}")
         rescue StandardError => e
           @logger.error { e.to_s }
+          
+          raise if @config.log_level == :DEBUG
         end
         
         if !@eternal

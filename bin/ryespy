@@ -171,8 +171,8 @@ OptionParser.new do |opts|
   opts.separator ""
   opts.separator "Other:"
   
-  opts.on("-v", "--[no-]verbose", "Be somewhat verbose") do |o|
-    options[:verbose] = o
+  opts.on("-d", "--debug", "Set debug mode") do |o|
+    options[:debug] = o
   end
   
   opts.on_tail("--help",
@@ -209,7 +209,7 @@ end
 # = Configure
 
 @app.configure do |c|
-  c.log_level = :DEBUG if options[:verbose]
+  c.log_level = :DEBUG if options[:debug]
   
   c.listener = options[:listener]
   
@@ -269,7 +269,7 @@ begin
 rescue => e
   warn "#{$0}: #{e}"
   
-  if options[:verbose]
+  if options[:debug]
     raise # reraise for stacktrace
   else
     exit 1 # same non-zero status as when --debug

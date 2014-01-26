@@ -172,6 +172,8 @@ which is included by default in Ruby 1.9 onwards. To run all tests:
 
     rake test
 
+When using the `ryespy` executable in development, you'll probably want to set `--debug` mode so debug-level messages are logged and stack traces raised.
+
 
 ## Blessing
 
