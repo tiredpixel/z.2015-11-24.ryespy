@@ -47,6 +47,9 @@ Listener dependencies are required dynamically. That means that it may be necess
   
         $ gem install fog -v '~> 1.19'
 
+The default Ruby version supported is defined in `.ruby-version`.
+Any other versions supported are defined in `.travis.yml`.
+
 
 ## Usage
 
