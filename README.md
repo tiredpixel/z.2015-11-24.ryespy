@@ -72,6 +72,19 @@ Check IMAP, queue new email UIDs, and quit (maybe for Cron):
 
 For non-SSL, use `--no-imap-ssl`. For non-INBOX or multiple mailboxes, use `--imap-mailboxes INBOX,Sent`.
 
+Example worker:
+
+    class RyespyIMAPJob
+      
+      include Sidekiq::Worker
+      
+      sidekiq_options :queue => :ryespy
+      
+      def perform(mailbox, uid)
+      end
+      
+    end
+
 ### FTP Listener
 
 Check FTP, queue new file paths, and quit (maybe for Cron):
@@ -79,6 +92,19 @@ Check FTP, queue new file paths, and quit (maybe for Cron):
     $ ryespy --listener ftp --ftp-host ftp.example.com --ftp-username b@example.com --ftp-password helpimacucumber --notifier-sidekiq
 
 For PASSIVE mode, use `--ftp-passive`. For non-root or multiple directories, use `--ftp-dirs /DIR1,/DIR2`.
+
+Example worker:
+
+    class RyespyFTPJob
+      
+      include Sidekiq::Worker
+      
+      sidekiq_options :queue => :ryespy
+      
+      def perform(dir, filename)
+      end
+      
+    end
 
 ### Amazon S3 Listener
 
@@ -88,6 +114,19 @@ Check Amazon S3, queue new file keys, and quit (maybe for Cron):
 
 For non-* or multiple key prefix filters, use `--amzn-s3-prefixes virtual-dir1/,virtual-dir`.
 
+Example worker:
+
+    class RyespyAmznS3Job
+      
+      include Sidekiq::Worker
+      
+      sidekiq_options :queue => :ryespy
+      
+      def perform(filename)
+      end
+      
+    end
+
 ### Google Cloud Storage Listener
 
 Check Google Cloud Storage, queue new file keys, and quit (maybe for Cron):
@@ -96,6 +135,19 @@ Check Google Cloud Storage, queue new file keys, and quit (maybe for Cron):
 
 For non-* or multiple key prefix filters, use `--goog-cs-prefixes virtual-dir1/,virtual-dir`.
 
+Example worker:
+
+    class RyespyGoogCSJob
+      
+      include Sidekiq::Worker
+      
+      sidekiq_options :queue => :ryespy
+      
+      def perform(filename)
+      end
+      
+    end
+
 ### Rackspace Cloud Files Listener
 
 Check Rackspace Cloud Files, queue new file keys, and quit (maybe for Cron):
@@ -103,6 +155,19 @@ Check Rackspace Cloud Files, queue new file keys, and quit (maybe for Cron):
     $ ryespy --listener rax-cf --rax-cf-username vegetable --rax-cf-api-key helpimacelery --rax-cf-container vegetable-box --notifier-sidekiq
 
 For non-DFW region, use `--rax-cf-region lon`. For non-US auth endpoint, use `--rax-cf-endpoint uk`. Is your Rackspace account in London? Fret not; combine these and use `--rax-cf-endpoint uk --rax-cf-region lon`. For non-* or multiple key prefix filters, use `--rax-cf-prefixes virtual-dir1/,virtual-dir`.
+
+Example worker:
+
+    class RyespyRaxCFJob
+      
+      include Sidekiq::Worker
+      
+      sidekiq_options :queue => :ryespy
+      
+      def perform(filename)
+      end
+      
+    end
 
 
 ## Advanced Usage
