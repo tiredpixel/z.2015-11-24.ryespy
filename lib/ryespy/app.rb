@@ -120,8 +120,7 @@ module Ryespy
           check_all
         rescue StandardError => e
           @logger.error { e.to_s }
-          @logger.error { e.backtrace.to_s } #REMOVE!
-          
+
           raise if @config.log_level == :DEBUG
         end
         

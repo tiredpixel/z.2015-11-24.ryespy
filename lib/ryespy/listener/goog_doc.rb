@@ -20,18 +20,18 @@ module Ryespy
       def check(prefix)
         @logger.debug { "prefix: #{prefix}" }
 
-        @logger.debug { "redis_key: #{redis_key(prefix)}" }
+        @logger.debug { "redis_key: #{redis_key}" }
 
-        seen_files = @redis.hgetall(redis_key(prefix))
+        seen_files = @redis.hgetall(redis_key)
 
         unseen_files = get_unseen_files(prefix, seen_files)
 
         @logger.debug { "unseen_files: #{unseen_files}" }
 
-        unseen_files.each do |filename, checksum|
-          @redis.hset(redis_key(prefix), filename, checksum)
+        unseen_files.each do |key, val|
+          @redis.hset(redis_key, key, val)
 
-          @notifiers.each { |n| n.notify(SIDEKIQ_JOB_CLASS, [prefix, filename]) }
+          @notifiers.each { |n| n.notify(SIDEKIQ_JOB_CLASS, [key]) }
         end
 
         @logger.info { "#{prefix} has #{unseen_files.count} new files" }
@@ -43,20 +43,19 @@ module Ryespy
         @google_doc = GoogleDrive.login(@config[:username], @config[:password])
       end
 
-      def redis_key(prefix)
+      def redis_key
         [
           REDIS_KEY_PREFIX,
-          @config[:username],
-          prefix,
+          @config[:username]
         ].join(':')
       end
 
       def get_unseen_files(prefix, seen_files)
         files = {}
-        
         @google_doc.files.each do |file|
-          next unless file.title =~ /^#{prefix}/
-          if seen_files[file.key] != file.key 
+
+          next unless file.title =~ /^#{prefix}/ && file.key && file.resource_type != 'folder'
+          if seen_files[file.key] != file.key
             files[file.key] = file.key
           end
         end
