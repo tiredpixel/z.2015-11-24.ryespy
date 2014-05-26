@@ -43,6 +43,10 @@ Listener dependencies are required dynamically. That means that it may be necess
   
         $ gem install fog -v '~> 1.19'
 
+- `--listener goog-docs` :
+
+        $ gem google_drive -v '~> 0.3'
+
 - `--listener rax-cf` :
   
         $ gem install fog -v '~> 1.19'
@@ -146,6 +150,25 @@ Example worker:
       def perform(filename)
       end
       
+    end
+
+### Google Docs Listener
+
+Check Google Docs, queue new file keys, and quit (maybe for Cron):
+
+    $ ryespy --listener goog-doc --goog-doc-username vegetable-box@gmail.com --goog-doc-password helpimgarlic --goog-doc-prefix vegetable-box --notifier-sidekiq
+
+Example worker:
+
+    class RyespyGoogDocJob
+
+      include Sidekiq::Worker
+
+      sidekiq_options :queue => :ryespy
+
+      def perform(doc_key)
+      end
+
     end
 
 ### Rackspace Cloud Files Listener
