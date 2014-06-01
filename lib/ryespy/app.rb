@@ -31,8 +31,8 @@ module Ryespy
         :goog_cs => {
           :filters => [''], # prefixes
         },
-        :goog_doc => {
-          :filters => [''], # prefixes
+        :goog_drv => {
+          :filters => [''],
         },
         :rax_cf => {
           :endpoint => :us,
@@ -142,7 +142,7 @@ module Ryespy
         :ftp     => :FTP,
         :amzn_s3 => :AmznS3,
         :goog_cs => :GoogCS,
-        :goog_doc => :GoogDoc,
+        :goog_drv => :GoogDrv,
         :rax_cf  => :RaxCF,
       }
       

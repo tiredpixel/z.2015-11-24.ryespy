@@ -31,9 +31,9 @@ OptionParser.new do |opts|
     'ftp',
     'amzn-s3',
     'goog-cs',
-    'goog-doc',
+    'goog-drv',
     'rax-cf',
-  ], "Listener (imap|ftp|amzn-s3|goog-cs|goog-doc|rax-cf)") do |o|
+  ], "Listener (imap|ftp|amzn-s3|goog-cs|goog-drv|rax-cf)") do |o|
     options[:listener] = o.tr('-', '_').to_sym
   end
   
@@ -152,18 +152,18 @@ OptionParser.new do |opts|
   end
 
   opts.separator ""
-  opts.separator "--listener goog-doc (Google Docs) :"
+  opts.separator "--listener goog-drv (Google Drive) :"
 
-  opts.on("--goog-doc-username USERNAME", "USERNAME") do |o|
-    options[:goog_doc_username] = o
+  opts.on("--goog-drv-username USERNAME", "USERNAME") do |o|
+    options[:goog_drv_username] = o
   end
 
-  opts.on("--goog-doc-password PASSWORD", "PASSWORD") do |o|
-    options[:goog_doc_password] = o
+  opts.on("--goog-drv-password PASSWORD", "PASSWORD") do |o|
+    options[:goog_drv_password] = o
   end
 
-  opts.on("--goog-doc-prefix [P1,P2]", Array, "Prefixes P1,P2 (default: *)") do |o|
-    options[:goog_doc_filters] = o
+  opts.on("--goog-drv-filters [P1,P2]", Array, "Filters F1,F2 (default: *)") do |o|
+    options[:goog_drv_filters] = o
   end
 
   opts.separator ""
@@ -286,10 +286,10 @@ end
       :bucket,
       :filters, # prefixes
     ],
-    :goog_doc => [
+    :goog_drv => [
       :username,
       :password,
-      :filters, # prefixes
+      :filters,
     ],
     :rax_cf => [
       :endpoint,

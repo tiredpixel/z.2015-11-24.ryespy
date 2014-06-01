@@ -3,10 +3,10 @@ require "google_drive"
 
 module Ryespy
   module Listener
-    class GoogDoc < Base
+    class GoogDrv < Base
 
-      REDIS_KEY_PREFIX  = 'goog_doc'.freeze
-      SIDEKIQ_JOB_CLASS = 'RyespyGoogDocJob'.freeze
+      REDIS_KEY_PREFIX  = 'goog_drv'.freeze
+      SIDEKIQ_JOB_CLASS = 'RyespyGoogDrvJob'.freeze
 
       def initialize(opts = {})
         @config = {
@@ -17,14 +17,14 @@ module Ryespy
         super(opts)
       end
 
-      def check(prefix)
-        @logger.debug { "prefix: #{prefix}" }
+      def check(filter)
+        @logger.debug { "filter: #{filter}" }
 
         @logger.debug { "redis_key: #{redis_key}" }
 
         seen_files = @redis.hgetall(redis_key)
 
-        unseen_files = get_unseen_files(prefix, seen_files)
+        unseen_files = get_unseen_files(filter, seen_files)
 
         @logger.debug { "unseen_files: #{unseen_files}" }
 
@@ -34,13 +34,13 @@ module Ryespy
           @notifiers.each { |n| n.notify(SIDEKIQ_JOB_CLASS, [key]) }
         end
 
-        @logger.info { "#{prefix} has #{unseen_files.count} new files" }
+        @logger.info { "#{filter} has #{unseen_files.count} new files" }
       end
 
       private
 
       def connect_service
-        @google_doc = GoogleDrive.login(@config[:username], @config[:password])
+        @google_drive = GoogleDrive.login(@config[:username], @config[:password])
       end
 
       def redis_key
@@ -50,13 +50,15 @@ module Ryespy
         ].join(':')
       end
 
-      def get_unseen_files(prefix, seen_files)
+      def get_unseen_files(filter, seen_files)
         files = {}
-        @google_doc.files.each do |file|
+        @google_drive.files.each do |file|
 
-          next unless file.title =~ /^#{prefix}/ && file.key && file.resource_type != 'folder'
-          if seen_files[file.key] != file.key
-            files[file.key] = file.key
+          next unless file.title =~ /#{filter}/ && file.resource_id && file.resource_type != 'folder'
+          if seen_files[file.resource_id] != file.resource_id
+            warn file.resource_id
+            warn file.key
+            files[file.resource_id] = file.resource_id
           end
         end
 
