@@ -56,8 +56,6 @@ module Ryespy
 
           next unless file.title =~ /#{filter}/ && file.resource_id && file.resource_type != 'folder'
           if seen_files[file.resource_id] != file.resource_id
-            warn file.resource_id
-            warn file.key
             files[file.resource_id] = file.resource_id
           end
         end
