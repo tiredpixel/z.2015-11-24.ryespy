@@ -162,7 +162,7 @@ OptionParser.new do |opts|
     options[:goog_drv_password] = o
   end
 
-  opts.on("--goog-drv-filters [P1,P2]", Array, "Filters F1,F2 (default: *)") do |o|
+  opts.on("--goog-drv-filters [F1,F2]", Array, "Filters F1,F2 (default: *)") do |o|
     options[:goog_drv_filters] = o
   end
 
