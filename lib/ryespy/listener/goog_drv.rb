@@ -52,14 +52,24 @@ module Ryespy
 
       def get_unseen_files(filter, seen_files)
         files = {}
+        
         @google_drive.files.each do |file|
-
           next unless file.title =~ /#{filter}/ && file.resource_id && file.resource_type != 'folder'
-          if seen_files[file.resource_id] != file.resource_id
-            files[file.resource_id] = file.resource_id
+          
+          # updated should be present for all resource_type , but there is often
+          # a delay until it is set.
+          updated = file.document_feed_entry.css('updated').first.text
+          
+          # etag is present for most resource_type , but is nil for spreadsheet.
+          etag = file.document_feed_entry.attribute('etag')
+          
+          checksum = "#{updated},#{etag}"
+          
+          if seen_files[file.resource_id] != checksum
+            files[file.resource_id] = checksum
           end
         end
-
+        
         files
       end
 
