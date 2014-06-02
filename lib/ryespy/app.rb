@@ -31,6 +31,9 @@ module Ryespy
         :goog_cs => {
           :filters => [''], # prefixes
         },
+        :goog_drv => {
+          :filters => [''],
+        },
         :rax_cf => {
           :endpoint => :us,
           :region   => :dfw,
@@ -68,7 +71,6 @@ module Ryespy
     def notifiers
       unless @notifiers
         @notifiers = []
-        
         @config.notifiers[:sidekiq].each do |notifier_url|
           @notifiers << Notifier::Sidekiq.new(
             :url       => notifier_url,
@@ -118,7 +120,7 @@ module Ryespy
           check_all
         rescue StandardError => e
           @logger.error { e.to_s }
-          
+
           raise if @config.log_level == :DEBUG
         end
         
@@ -140,6 +142,7 @@ module Ryespy
         :ftp     => :FTP,
         :amzn_s3 => :AmznS3,
         :goog_cs => :GoogCS,
+        :goog_drv => :GoogDrv,
         :rax_cf  => :RaxCF,
       }
       

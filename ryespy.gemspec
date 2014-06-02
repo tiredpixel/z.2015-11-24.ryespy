@@ -26,4 +26,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "fog", "~> 1.19" # conditional dependency
   spec.add_development_dependency "mocha", "~> 0.14"
   spec.add_development_dependency "sidekiq-spy", ">= 0.3.2"
+  spec.add_development_dependency "google_drive", '~> 0.3'
 end
