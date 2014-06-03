@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Ryespy::VERSION
   spec.authors       = ["tiredpixel"]
   spec.email         = ["tp@tiredpixel.com"]
-  spec.description   = %q{Redis Sidekiq/Resque IMAP, FTP, Amazon S3, Google Cloud Storage, Rackspace Cloud Files listener.}
-  spec.summary       = %q{Redis Sidekiq/Resque IMAP, FTP, Amazon S3, Google Cloud Storage, Rackspace Cloud Files listener.}
+  spec.summary       = %q{Redis Sidekiq/Resque IMAP, FTP, Amazon S3, Google Cloud Storage, Google Drive, Rackspace Cloud Files listener.}
+  spec.description   = %q{}
   spec.homepage      = "https://github.com/tiredpixel/ryespy"
   spec.license       = "MIT"
   
@@ -25,5 +25,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rake"
   spec.add_development_dependency "fog", "~> 1.19" # conditional dependency
   spec.add_development_dependency "mocha", "~> 0.14"
-  spec.add_development_dependency "sidekiq-spy", "~> 0.3"
+  spec.add_development_dependency "sidekiq-spy", ">= 0.3.2"
+  spec.add_development_dependency "google_drive", '~> 0.3'
 end

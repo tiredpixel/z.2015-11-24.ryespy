@@ -1,5 +1,6 @@
 require 'fog'
 
+require_relative 'base'
 require_relative 'fogable'
 
 

@@ -1,5 +1,7 @@
 require 'net/ftp'
 
+require_relative 'base'
+
 
 module Ryespy
   module Listener
