@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = Ryespy::VERSION
   spec.authors       = ["tiredpixel"]
   spec.email         = ["tp@tiredpixel.com"]
-  spec.description   = %q{Redis Sidekiq/Resque IMAP, FTP, Amazon S3, Google Cloud Storage, Rackspace Cloud Files listener.}
-  spec.summary       = %q{Redis Sidekiq/Resque IMAP, FTP, Amazon S3, Google Cloud Storage, Rackspace Cloud Files listener.}
+  spec.summary       = %q{Redis Sidekiq/Resque IMAP, FTP, Amazon S3, Google Cloud Storage, Google Drive, Rackspace Cloud Files listener.}
+  spec.description   = %q{}
   spec.homepage      = "https://github.com/tiredpixel/ryespy"
   spec.license       = "MIT"
   
