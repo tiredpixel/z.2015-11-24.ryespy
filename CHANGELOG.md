@@ -2,8 +2,15 @@
 
 This changelog documents the main changes between released versions.
 For a full list of changes, consult the commit history.
-For many of commits by [tiredpixel](http://www.tiredpixel.com), the commit
-message provides information and examples.
+
+
+## 1.1.0
+
+- start of support for Ruby 2.1.1
+- start of support for Ruby 2.1.2
+- improved `README` with workers examples
+- [#1] new Google Drive listener (`--listener goog-drv`) (thank you, @Lewis-Clayton)
+- extension of [#1] with changes detection and tests
 
 
 ## 1.0.0
