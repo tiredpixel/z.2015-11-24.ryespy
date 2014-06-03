@@ -1,5 +1,7 @@
 require "google_drive"
 
+require_relative 'base'
+
 
 module Ryespy
   module Listener

@@ -1,5 +1,7 @@
 require 'net/imap'
 
+require_relative 'base'
+
 
 module Ryespy
   module Listener
