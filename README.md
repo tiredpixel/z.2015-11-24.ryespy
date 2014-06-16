@@ -149,6 +149,13 @@ use `--goog-cs-prefixes virtual-dir1/,virtual-dir`.
 
 ### Google Drive Listener
 
+*Note that the Google Drive listener currently has a pre-filter maximum of 1000
+files. That means that having more files than this in an account is not (yet)
+supported; such files might be ignored entirely, or strange behaviour might be
+encountered depending on the order in which the files are returned.*
+*<https://github.com/tiredpixel/ryespy/pull/2>*  
+*<https://github.com/tiredpixel/ryespy/issues/3>*
+
 Check Google Drive, queue new file resource ids, and quit:
 
     ryespy --listener goog-drv --goog-drv-username vegetable-box@gmail.com --goog-drv-password helpimgarlic --goog-drv-filters vegetable-box --notifier-sidekiq

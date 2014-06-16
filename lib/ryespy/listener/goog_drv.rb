@@ -55,7 +55,7 @@ module Ryespy
       def get_unseen_files(filter, seen_files)
         files = {}
         
-        @google_drive.files.each do |file|
+        @google_drive.files('max-results' => 1000).each do |file|
           next unless file.title =~ /#{filter}/ && file.resource_id && file.resource_type != 'folder'
           
           # updated should be present for all resource_type , but there is often
