@@ -4,6 +4,11 @@ This changelog documents the main changes between released versions.
 For a full list of changes, consult the commit history.
 
 
+## 1.1.1
+
+- [#2] Google Drive listener fix changing max files from 100 to 1000; outstanding [#3] to remove limit entirely (thank you, @Lewis-Clayton)
+
+
 ## 1.1.0
 
 - start of support for Ruby 2.1.1
