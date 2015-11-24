@@ -1,21 +1,7 @@
 language: ruby
-before_install:
-  - "gem install bundler -v '~> 1.5, != 1.5.0'"
 rvm:
-  - 2.1.2
-  - 2.1.1
-  - 2.1.0
   - 2.0.0
-  - 1.9.3
-  - jruby-19mode
-  - rbx-2.1.1
+  - 2.1.7
+  - 2.2.3
 services:
   - redis-server
-notifications:
-  email:
-    recipients:
-      - tp@tiredpixel.com
-matrix:
-  allow_failures:
-    - rvm: jruby-19mode
-    - rvm: rbx-2.1.1
