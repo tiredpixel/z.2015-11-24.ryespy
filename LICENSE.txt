@@ -1,4 +1,4 @@
-Copyright (c) 2013 tiredpixel
+Copyright (c) tiredpixel and others 2013 - 2015
 
 MIT License
 

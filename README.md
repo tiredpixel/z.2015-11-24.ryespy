@@ -17,7 +17,7 @@ Redis, and writes Sidekiq/Resque-compatible payloads.
 Ryespy was inspired by [Redimap](https://github.com/tiredpixel/redimap).
 Yes, it's sometimes possible to inspire oneself. Ryespy with my little eye.
 
-More sleep lost by [tiredpixel](http://www.tiredpixel.com).
+More sleep lost by [tiredpixel](https://www.tiredpixel.com).
 
 
 ## Externals
@@ -292,7 +292,5 @@ May you find peace, and help others to do likewise.
 
 ## Licence
 
-© [tiredpixel](http://www.tiredpixel.com) 2014 and
-[others](https://github.com/tiredpixel/ryespy/graphs/contributors).
-It is free software, released under the MIT License, and may be redistributed
-under the terms specified in `LICENSE`.
+© [tiredpixel](https://www.tiredpixel.com) and [others](https://github.com/tiredpixel/ryespy/graphs/contributors) 2013 - 2015.
+It is free software, released under the MIT License, and may be redistributed under the terms specified in `LICENSE.txt`.
