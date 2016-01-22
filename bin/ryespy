@@ -17,15 +17,15 @@ options = OpenStruct.new(
 
 OptionParser.new do |opts|
   opts.version = "v#{Ryespy::VERSION}"
-  
+
   opts.banner = opts.ver
-  
+
   opts.separator ""
   opts.separator "Usage: ryespy [OPTIONS]"
-  
+
   opts.separator ""
   opts.separator "Listener:"
-  
+
   opts.on("-l", "--listener LISTENER", [
     'imap',
     'ftp',
@@ -33,120 +33,121 @@ OptionParser.new do |opts|
     'goog-cs',
     'goog-drv',
     'rax-cf',
-  ], "Listener (imap|ftp|amzn-s3|goog-cs|goog-drv|rax-cf)") do |o|
+    'sftp',
+  ], "Listener (imap|ftp|amzn-s3|goog-cs|goog-drv|rax-cf|sftp)") do |o|
     options[:listener] = o.tr('-', '_').to_sym
   end
-  
+
   opts.separator ""
   opts.separator "Polling:"
-  
+
   opts.on("-e", "--[no-]eternal", "Run eternally (default: no)") do |o|
     options[:eternal] = o
   end
-  
+
   opts.on("--polling-interval [N]", Integer, "Poll every N seconds (default: 60)") do |o|
     options[:polling_interval] = o
   end
-  
+
   opts.separator ""
   opts.separator "Redis:"
-  
+
   opts.on("--redis-url [URL]", "Ryespy URL (default: Redis default)") do |o|
     options[:redis_url] = o
   end
-  
+
   opts.on("--redis-ns-ryespy [NS]", "Ryespy namespace (default: ryespy)") do |o|
     options[:redis_ns_ryespy] = o
   end
-  
+
   opts.separator ""
   opts.separator "--listener imap (IMAP) :"
-  
+
   opts.on("--imap-host HOST", "Server HOST") do |o|
     options[:imap_host] = o
   end
-  
+
   opts.on("--imap-port [PORT]", Integer, "Server PORT (default: 993)") do |o|
     options[:imap_port] = o
   end
-  
+
   opts.on("--[no-]imap-ssl", "Use SSL (default: yes)") do |o|
     options[:imap_ssl] = o
   end
-  
+
   opts.on("--imap-username USERNAME", "Auth USERNAME") do |o|
     options[:imap_username] = o
   end
-  
+
   opts.on("--imap-password PASSWORD", "Auth PASSWORD") do |o|
     options[:imap_password] = o
   end
-  
+
   opts.on("--imap-mailboxes [INBOX,Mu]", Array, "Mailboxes INBOX,Mu (default: INBOX)") do |o|
     options[:imap_filters] = o
   end
-  
+
   opts.separator ""
   opts.separator "--listener ftp (FTP) :"
-  
+
   opts.on("--ftp-host HOST", "Server HOST") do |o|
     options[:ftp_host] = o
   end
-  
+
   opts.on("--ftp-port [PORT]", Integer, "Server PORT (default: 21)") do |o|
     options[:ftp_port] = o
   end
-  
+
   opts.on("--[no-]ftp-passive", "Use PASSIVE mode (default: no)") do |o|
     options[:ftp_passive] = o
   end
-  
+
   opts.on("--ftp-username USERNAME", "Auth USERNAME") do |o|
     options[:ftp_username] = o
   end
-  
+
   opts.on("--ftp-password PASSWORD", "Auth PASSWORD") do |o|
     options[:ftp_password] = o
   end
-  
+
   opts.on("--ftp-dirs [/D1,/D2]", Array, "Directories /D1,/D2 (default: /)") do |o|
     options[:ftp_filters] = o
   end
-  
+
   opts.separator ""
   opts.separator "--listener amzn-s3 (Amazon S3) :"
-  
+
   opts.on("--amzn-s3-access-key ACCESS", "Account ACCESS key") do |o|
     options[:amzn_s3_access_key] = o
   end
-  
+
   opts.on("--amzn-s3-secret-key SECRET", "Account SECRET key") do |o|
     options[:amzn_s3_secret_key] = o
   end
-  
+
   opts.on("--amzn-s3-bucket BUCKET", "Storage BUCKET") do |o|
     options[:amzn_s3_bucket] = o
   end
-  
+
   opts.on("--amzn-s3-prefixes [P1,P2]", Array, "Prefixes P1,P2 (default: *)") do |o|
     options[:amzn_s3_filters] = o
   end
-  
+
   opts.separator ""
   opts.separator "--listener goog-cs (Google Cloud Storage) :"
-  
+
   opts.on("--goog-cs-access-key ACCESS", "Account ACCESS key") do |o|
     options[:goog_cs_access_key] = o
   end
-  
+
   opts.on("--goog-cs-secret-key SECRET", "Account SECRET key") do |o|
     options[:goog_cs_secret_key] = o
   end
-  
+
   opts.on("--goog-cs-bucket BUCKET", "Storage BUCKET") do |o|
     options[:goog_cs_bucket] = o
   end
-  
+
   opts.on("--goog-cs-prefixes [P1,P2]", Array, "Prefixes P1,P2 (default: *)") do |o|
     options[:goog_cs_filters] = o
   end
@@ -168,56 +169,79 @@ OptionParser.new do |opts|
 
   opts.separator ""
   opts.separator "--listener rax-cf (Rackspace Cloud Files) :"
-  
+
   opts.on("--rax-cf-endpoint [ENDPOINT]", "Auth ENDPOINT (default: us)") do |o|
     options[:rax_cf_endpoint] = o
   end
-  
+
   opts.on("--rax-cf-username USERNAME", "Account USERNAME") do |o|
     options[:rax_cf_username] = o
   end
-  
+
   opts.on("--rax-cf-api-key API_KEY", "Account API_KEY") do |o|
     options[:rax_cf_api_key] = o
   end
-  
+
   opts.on("--rax-cf-container CONTAINER", "Storage CONTAINER") do |o|
     options[:rax_cf_container] = o
   end
-  
+
   opts.on("--rax-cf-region [REGION]", "Storage REGION (default: dfw)") do |o|
     options[:rax_cf_region] = o
   end
-  
+
   opts.on("--rax-cf-prefixes [P1,P2]", Array, "Prefixes P1,P2 (default: *)") do |o|
     options[:rax_cf_filters] = o
   end
-  
+
+  opts.separator ""
+  opts.separator "--listener sftp (SFTP) :"
+
+  opts.on("--sftp-host HOST", "Server HOST") do |o|
+    options[:sftp_host] = o
+  end
+
+  opts.on("--sftp-username USERNAME", "Auth USERNAME") do |o|
+    options[:sftp_username] = o
+  end
+
+  opts.on("--sftp-port [PORT]", Integer, "Server PORT (default: 22)") do |o|
+    options[:sftp_port] = o
+  end
+
+  opts.on("--sftp-password PASSWORD", "Auth PASSWORD") do |o|
+    options[:sftp_password] = o
+  end
+
+  opts.on("--sftp-dirs [/D1,/D2]", Array, "Directories /D1,/D2 (default: /)") do |o|
+    options[:sftp_filters] = o
+  end
+
   opts.separator ""
   opts.separator "Notifiers:"
-  
+
   opts.on("--redis-ns-notifiers [NS]", "Notifiers namespace (default: resque)") do |o|
     options[:redis_ns_notifiers] = o
   end
-  
+
   opts.on("--notifier-sidekiq [URL]", "Sidekiq Redis URL (default: Redis default)") do |o|
     (options.notifiers[:sidekiq] ||= []) << o
   end
-  
+
   opts.separator ""
   opts.separator "Other:"
-  
+
   opts.on("-d", "--debug", "Set debug mode") do |o|
     options[:debug] = o
   end
-  
+
   opts.on_tail("--help",
     "Output (this) help and exit"
   ) do
     puts opts
     exit
   end
-  
+
   opts.on_tail("--version",
     "Output version and exit"
   ) do
@@ -246,9 +270,9 @@ end
 
 @app.configure do |c|
   c.log_level = :DEBUG if options[:debug]
-  
+
   c.listener = options[:listener]
-  
+
   [
     :polling_interval,
     :redis_url,
@@ -256,7 +280,7 @@ end
     :redis_ns_notifiers,
     :notifiers,
   ].each { |k| c[k] = options[k] unless options[k].nil? }
-  
+
   {
     :imap => [
       :host,
@@ -299,9 +323,16 @@ end
       :container,
       :filters, # prefixes
     ],
+    :sftp => [
+      :host,
+      :port,
+      :username,
+      :password,
+      :filters, # dirs
+    ],
   }[c.listener].each do |k|
     lk = "#{c.listener}_#{k}".to_sym
-    
+
     c[c.listener][k] = options[lk] unless options[lk].nil?
   end
 end
@@ -315,7 +346,7 @@ begin
   @app.start
 rescue => e
   warn "#{$0}: #{e}"
-  
+
   if options[:debug]
     raise # reraise for stacktrace
   else
